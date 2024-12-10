@@ -34,3 +34,22 @@ var reduce = function(nums, fn, init) {
 
    return val;
 };
+
+//function composition
+
+var compose = function(funcions){
+    if(funcions.length === 0){
+        return function(x) {return x;};
+    }
+
+    return function(x){
+        let result = x;
+        for (let i = funcions.lenght - 1; i>=0; i--){
+            result = funcions[i](result);
+        }
+        return result;
+    }
+}
+
+const fn = compose([x => x +1, x => x * 2]);
+console.log(fn(4));
