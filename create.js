@@ -29,3 +29,19 @@ exports.createUser = (req,res) =>{
     .then((user)=>res.send(user))
     .then((err)=>res.status(400).send(err));
 }
+
+//controllers/users.js
+// module.exports.login = (req,res) =>{
+//     const {email,password} = req.body;
+
+//     User.findOne({email})
+//     .then((user) => {
+//         if(!user){
+//             return Promise.reject(new Error('incorrect password or email');)
+//         }
+//          return bcrypt.compare(password,user.password);
+//     })
+//     .catch((err) =>{
+//         res.status(401).send({message:err.message});
+//     })
+// }
