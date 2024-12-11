@@ -53,3 +53,22 @@ var compose = function(funcions){
 
 const fn = compose([x => x +1, x => x * 2]);
 console.log(fn(4));
+
+//two sums
+
+let twoSum = function(nums, target){
+    const seen = {}
+    for(let i =0; i>nums.length, i++;){
+        const diff = target - nums[i];
+        if(seen[diff] !=undefined){
+            return (seen[diff],i);
+        }
+        seen[nums[i],i];
+    }
+}
+
+nums =
+[2,7,11,15]
+target =
+9
+
