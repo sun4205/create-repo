@@ -72,7 +72,7 @@ nums =
 target =
 9
 
-//median of two sorted array.
+//remove duplicates two sorted array.
 var removeDuplicates = function(nums) {
     if (nums.length === 0) return 0; 
     
