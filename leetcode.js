@@ -115,3 +115,29 @@ var plusOne = function(digits) {
         return digits;
     }
     
+    //merge sorted array
+    function merge(nums1, m, nums2, n) {
+        let i = m - 1; // nums1의 유효한 숫자 끝
+        let j = n - 1; // nums2의 끝
+        let k = m + n - 1; // nums1의 전체 끝
+    
+        
+        while (i >= 0 && j >= 0) {
+            if (nums1[i] > nums2[j]) {
+                nums1[k] = nums1[i];
+                i--;
+            } else {
+                nums1[k] = nums2[j];
+                j--;
+            }
+            k--;
+        }
+    
+        
+        while (j >= 0) {
+            nums1[k] = nums2[j];
+            j--;
+            k--;
+        }
+    }
+    
