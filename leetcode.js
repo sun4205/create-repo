@@ -117,9 +117,9 @@ var plusOne = function(digits) {
     
     //merge sorted array
     function merge(nums1, m, nums2, n) {
-        let i = m - 1; // nums1의 유효한 숫자 끝
-        let j = n - 1; // nums2의 끝
-        let k = m + n - 1; // nums1의 전체 끝
+        let i = m - 1; 
+        let j = n - 1; 
+        let k = m + n - 1; 
     
         
         while (i >= 0 && j >= 0) {
@@ -140,4 +140,41 @@ var plusOne = function(digits) {
             k--;
         }
     }
+
+    //convert sorted array
+    
+function TreeNode(val) {
+    this.val = val;
+    this.left = this.right = null;
+}
+
+
+var sortedArrayToBST = function(nums) {
+    
+    function buildTree(left, right) {
+        
+        if (left > right) return null;
+        
+        
+        const mid = Math.floor((left + right) / 2);
+        const node = new TreeNode(nums[mid]);
+        
+        
+        node.left = buildTree(left, mid - 1);
+        
+        node.right = buildTree(mid + 1, right);
+        
+        return node;
+    }
+    
+    
+    return buildTree(0, nums.length - 1);
+};
+
+
+const nums = [1, 2, 3, 4, 5, 6, 7];
+const root = sortedArrayToBST(nums);
+
+console.log(root);  
+
     
