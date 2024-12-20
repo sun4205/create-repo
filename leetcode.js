@@ -114,15 +114,14 @@ var plusOne = function(digits) {
         digits.unshift(1);
         return digits;
     }
-    
-    //two sum review
-    var twoSum1 = function(nums, target) {
-        const seen ={};
-        for (let i=0; i<nums.length;i++){
-            const diff = target-nums[i];
-            if(seen[diff] !=undefined){
-                return[seen[diff],i];
-            }
-            seen[nums[i]] = i;
+
+    //pascal's Triangle
+    function getRow(rowIndex) {
+        let row = [1]; 
+        for (let i = 0; i < rowIndex; i++) {
+          row = [0, ...row, 0].map((_, j, arr) => arr[j] + arr[j + 1]).slice(0, -1);
         }
-    };
+        return row;
+      }
+
+    
