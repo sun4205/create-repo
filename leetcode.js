@@ -114,84 +114,14 @@ var plusOne = function(digits) {
         digits.unshift(1);
         return digits;
     }
-    
-    //merge sorted array
-    function merge(nums1, m, nums2, n) {
-        let i = m - 1; 
-        let j = n - 1; 
-        let k = m + n - 1; 
-    
-        
-        while (i >= 0 && j >= 0) {
-            if (nums1[i] > nums2[j]) {
-                nums1[k] = nums1[i];
-                i--;
-            } else {
-                nums1[k] = nums2[j];
-                j--;
-            }
-            k--;
+
+    //pascal's Triangle
+    function getRow(rowIndex) {
+        let row = [1]; 
+        for (let i = 0; i < rowIndex; i++) {
+          row = [0, ...row, 0].map((_, j, arr) => arr[j] + arr[j + 1]).slice(0, -1);
         }
-    
-        
-        while (j >= 0) {
-            nums1[k] = nums2[j];
-            j--;
-            k--;
-        }
-    }
-
-    //convert sorted array
-    
-function TreeNode(val) {
-    this.val = val;
-    this.left = this.right = null;
-}
-
-
-var sortedArrayToBST = function(nums) {
-    
-    function buildTree(left, right) {
-        
-        if (left > right) return null;
-        
-        
-        const mid = Math.floor((left + right) / 2);
-        const node = new TreeNode(nums[mid]);
-        
-        
-        node.left = buildTree(left, mid - 1);
-        
-        node.right = buildTree(mid + 1, right);
-        
-        return node;
-    }
-    
-    
-    return buildTree(0, nums.length - 1);
-};
-
-
-const nums = [1, 2, 3, 4, 5, 6, 7];
-const root = sortedArrayToBST(nums);
-
-console.log(root);  
-
-//pascals's triangle
-function generate(numRows) {
-    let triangle = []; 
-  
-    for (let i = 0; i < numRows; i++) {
-      let row = new Array(i + 1).fill(1); 
-  
-      for (let j = 1; j < i; j++) { 
-        row[j] = triangle[i - 1][j - 1] + triangle[i - 1][j];
+        return row;
       }
-  
-      triangle.push(row); 
-    }
-  
-    return triangle;
-  }
-  
+
     
