@@ -1,22 +1,23 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const mainRouter = requrie("./routes/index");
+const auth = require("./middlewares/auth");
+const userRouter = require("./users");
+const itemRouter = require("./clothingItems");
+const { login, createUser } = require("");
+const { NOT_FOUNC } = require("");
 
-const app = express();
-const { PORT = 3001 } = process.env;
+const router = express.Router();
 
-mongoose
-  .connect("")
-  .then(() => {
-    console.log("database is connected");
-  })
-  .catch(console.error);
+router.post("/signin", login);
+router.post("/signup", createUser);
 
-app.use(cors());
-app.use(express.json());
-app.use("/", mainRouter);
+router.use("/items", itemRouter);
 
-app.listen(PORT, () => {
-  console.log(`server is running on${PORT}`);
+router.use(auth);
+
+router.use("./users", useRouter);
+
+router.use((req, res) => {
+  res.status(NOT_FOUDN).send({ message: "Requested Resources not found" });
 });
+
+module.exports = router;
