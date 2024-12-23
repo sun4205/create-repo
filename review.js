@@ -1,16 +1,22 @@
-let twoSum = function (nums, target) {
-  const seen = {};
-  for (let i = 0; i < nums.length; i++) {
-    const diff = target - nums[i];
-    if (seen[diff] != undefined) {
-      return [seen[diff], i];
-    }
-    seen[nums[i]] = i;
-  }
-  return [];
-};
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const mainRouter = requrie("./routes/index");
 
-nums = [2, 7, 11, 15];
-target = 9;
+const app = express();
+const { PORT = 3001 } = process.env;
 
-console.log(twoSum(nums, target));
+mongoose
+  .connect("")
+  .then(() => {
+    console.log("database is connected");
+  })
+  .catch(console.error);
+
+app.use(cors());
+app.use(express.json());
+app.use("/", mainRouter);
+
+app.listen(PORT, () => {
+  console.log(`server is running on${PORT}`);
+});
