@@ -1,33 +1,54 @@
 const mongoose = require("mongoose");
-const Item = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SEVER_ERROR,
-  FORBIDDEN,
-} = require("../utils/errors");
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
 
-const isValidObjectId = (id) => (mongoose.Types.ObjectId = isValid(id));
+const userSchema = new mongoose.Schema({
+  name: { type: String, require: true, minlength: 2, maxlength: 30 },
+  avatar: {
+    type: String,
+    require: [true, "The avatar felid is required"],
+    validate: {
+      validator(value) {
+        return validator.isURL(value, {
+          protocols: ["http", "https"],
+          require_protocol: true,
+        });
+      },
+      message: " you must enter a valid Url",
+    },
+  },
+  email: {
+    type: String,
+    require: [true, "The email field is required"],
+    unique: true,
+    validate: {
+      validator(value) {
+        return validator.isEmail(value);
+      },
+      message: "You must enter a valid email address",
+    },
+  },
+  password: {
+    type: String,
+    required: [true, "The password feild is required"],
+    select: false,
+  },
+});
 
-const getItems = (req, res) => {
-  Item.find({})
-    .then((tiems) => res.send(items))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SEVER_ERROR)
-        .send({ message: "An error has occured on the server" });
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email })
+    .select(+password)
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new Error("incorrect email and password"));
+      }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error("Incorrect email and password"));
+        }
+        return user;
+      });
     });
 };
 
-const createItem = (req, res) => {
-  const { name, weather, imageUrl } = req.body;
-
-  if (!req.user || !req.user._id) {
-    return res
-      .status(BAD_REQUEST)
-      .send({ message: "User is not Authenticated" });
-  }
-
-  const owner = req.user._id;
-};
+module.exports = mongoose.model("user", userSchema);
