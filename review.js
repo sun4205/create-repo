@@ -1,23 +1,33 @@
-const express = require("express");
-const auth = require("./middlewares/auth");
-const userRouter = require("./users");
-const itemRouter = require("./clothingItems");
-const { login, createUser } = require("");
-const { NOT_FOUNC } = require("");
+const mongoose = require("mongoose");
+const Item = require("../models/clothingItem");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SEVER_ERROR,
+  FORBIDDEN,
+} = require("../utils/errors");
 
-const router = express.Router();
+const isValidObjectId = (id) => (mongoose.Types.ObjectId = isValid(id));
 
-router.post("/signin", login);
-router.post("/signup", createUser);
+const getItems = (req, res) => {
+  Item.find({})
+    .then((tiems) => res.send(items))
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(INTERNAL_SEVER_ERROR)
+        .send({ message: "An error has occured on the server" });
+    });
+};
 
-router.use("/items", itemRouter);
+const createItem = (req, res) => {
+  const { name, weather, imageUrl } = req.body;
 
-router.use(auth);
+  if (!req.user || !req.user._id) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "User is not Authenticated" });
+  }
 
-router.use("./users", useRouter);
-
-router.use((req, res) => {
-  res.status(NOT_FOUDN).send({ message: "Requested Resources not found" });
-});
-
-module.exports = router;
+  const owner = req.user._id;
+};
