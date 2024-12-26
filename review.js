@@ -1,54 +1,45 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, require: true, minlength: 2, maxlength: 30 },
-  avatar: {
+const clothingSchema = new mongoose.Schema({
+  name: {
     type: String,
-    require: [true, "The avatar felid is required"],
-    validate: {
-      validator(value) {
-        return validator.isURL(value, {
-          protocols: ["http", "https"],
-          require_protocol: true,
-        });
-      },
-      message: " you must enter a valid Url",
+    required: true,
+    minlength: 2,
+    maxlength: 30,
+  },
+  weather: {
+    type: String,
+    required: true,
+    enum: {
+      values: ["hot", "warm", "cold"],
+      message: "Weather must be 'hot', 'warm', or 'cold'.",
     },
   },
-  email: {
+  imageUrl: {
     type: String,
-    require: [true, "The email field is required"],
-    unique: true,
+    require: true,
     validate: {
       validator(value) {
-        return validator.isEmail(value);
+        return validator.isURL(value);
       },
-      message: "You must enter a valid email address",
+      message: "You must enter a valid URL for the image",
     },
   },
-  password: {
-    type: String,
-    required: [true, "The password feild is required"],
-    select: false,
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
+  },
+  likes: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "user",
+    default: [],
+  },
+  createAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email })
-    .select(+password)
-    .then((user) => {
-      if (!user) {
-        return Promise.reject(new Error("incorrect email and password"));
-      }
-      return bcrypt.compare(password, user.password).then((matched) => {
-        if (!matched) {
-          return Promise.reject(new Error("Incorrect email and password"));
-        }
-        return user;
-      });
-    });
-};
-
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("Item", clothingSchema);
