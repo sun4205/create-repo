@@ -1,23 +1,25 @@
-const jwt = reqiire("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
-const { UNATHURIZED } = require("../utils/errors");
+const getCurrentUser = (req, res) => {
+  const userId = req.user._id;
 
-module.exports = (req, res, next) => {
-  const { authorization } = req.headers;
-
-  if (!authorization || !authorization.startsWith("Bearer")) {
-    return res.status(UNATHURIZED).send({ message: "Authorization required" });
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(BAD_REQUEST).send({ message: "invalid user Id format" });
   }
-  const token = authorization.replace("Bearer", "");
-
-  let payload;
-
-  try {
-    payload = jwt.verify(token, JWT_SECRET);
-  } catch (err) {
-    return res.status(UNATHURIZED).send({ message: "Invalid token" });
-  }
-  req.user = payload;
-
-  return next();
+  return User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({ messgae: "user is not found" });
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      console.error("Error fetching user:", err);
+      if (err.name === "ValidationeError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided for user creation." });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error occurred on the server." });
+    });
 };
