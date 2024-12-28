@@ -1,22 +1,42 @@
-const getCurrentUser = (req, res) => {
-  const userId = req.user._id;
+const mongoose = require("mongoose");
+const Item = require("../models/clothingItem");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+  FORBIDDEN,
+} = require("../utils/eerors");
 
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(BAD_REQUEST).send({ message: "invalid user Id format" });
-  }
-  return User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ messgae: "user is not found" });
-      }
-      return res.send(user);
-    })
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+const getItems = (req, res) => {
+  Item.find({})
+    .then((items) => res.send(items))
     .catch((err) => {
-      console.error("Error fetching user:", err);
-      if (err.name === "ValidationeError") {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Invalid data provided for user creation." });
+      console.error(err);
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: "An error has occurred on the server." });
+    });
+};
+
+const createItem = (req, res) => {
+  const { name, weather, imageUrl } = req.body;
+
+  if (!req.user || !req.user._id) {
+    return res
+      .status(BAD_REQUEST)
+      .send({ message: "User is not authenticated." });
+  }
+
+  const owner = req.user._id;
+
+  return Item.create({ name, weather, imageUrl, owner })
+    .then((item) => res.status(201).send(item))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
