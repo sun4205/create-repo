@@ -1,13 +1,11 @@
-export const BASE_URL = "https://api.nomoreparties.co";
-
-export const getUserInfo = (token) => {
-  return fetch(`${BASE_URL}/users/me`, {
-    method: "GET",
+export const register = (username, password, email) => {
+  return fetch(`${BASE_URL}/auth/local/register`, {
+    method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    body: JSON.stringify({ username, password, email }),
   }).then((res) => {
     return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
   });
