@@ -1,11 +1,14 @@
-const TOKEN_KEY = "jwt";
+export const BASE_URL = "https://api.nomoreparties.co";
 
-export const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
-
-export const getToken = () => {
-  return localStorage.getItem(TOKEN_KEY);
-};
-
-export const removeToken = () => {
-  localStorage.removeItem(TOKEN_KEY);
+export const getUserInfo = (token) => {
+  return fetch(`${BASE_URL}/users/me`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => {
+    return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
+  });
 };
