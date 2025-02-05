@@ -12,6 +12,8 @@ const twoSum = function (nums, target) {
   }
 };
 
+
+
 const removeDuplicates = function (nums){
     let k=1;
     for(let i=0; i<nums.length-1; i++){
@@ -23,3 +25,28 @@ const removeDuplicates = function (nums){
     return k;
 }
 
+var removeElement = function(nums, val) {
+    let k=0;
+    for(let i=0; i<nums.length; i++){
+        for(let j=0; j<val.length; j++){
+            if(nums[i] === val[i]){
+                nums = nums.filter(num => num == val[i]);
+                k++;
+            }
+        }
+    }
+    return k;
+};
+
+var removeElement = function(nums, val) {
+    let k = 0;  
+    
+    for (let i = 0; i < nums.length; i++) {
+        if (nums[i] !== val) {  
+            nums[k] = nums[i];  
+            k++;  
+        }
+    }
+    
+    return k;  
+};
