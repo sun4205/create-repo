@@ -1,5 +1,7 @@
-const [userData, setUserData] = useState({ username: "", email: "" });
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+const openRemoveItemModal = (card) => {
+    setSelectedCard(card);
+    setIsRemoveItemModalOpen(true);
+  };
 
-const navigate = useNavigate();
-const location = useLocation();
+  const closeRemoveItemModal = () => setIsRemoveItemModalOpen(false);
+  

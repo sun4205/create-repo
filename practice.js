@@ -1,199 +1,66 @@
-//auth.js
-export const BASE_URL = "http://localhost:3001";
-
-export const register = (name, avatar, email, password ) => {
-  return fetch(`${BASE_URL}/auth/signup`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ name, avatar, email, password }),
-  }).then((res) => {
-    return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
-  });
-};
-
-export const authorize = (email, password) => {
-  return fetch(`${BASE_URL}/auth/signin`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  }).then((res) => {
-    return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
-  });
-};
-
-//RegisterModel
-
-import React, { useRef, useState } from "react";
+import "./ItemModal.css";
+import itemModalclose from "../../assets/itemModalClose.svg";
 import ModalWithForm from "../ModalWithForm/ModalWithForm";
-import { useForm } from "../../utils/useForm";
+import { useRef } from "react";
 import useEscapeKey from "../../utils/useEscapeKey";
 
-const RegisterModal = ({
-  activeModal,
-  closeActiveModal,
-  handleAddItemSubmit,
-  buttonText,
-}) => {
-  const { values, handleChange } = useForm({
-    email: "",
-    password: "",
-    name: "",
-    avatarURL: "", 
-  });
-
+function ItemModal({ activeModal, onClose, card, handleDeleteClick, currentUser }) {
   const modalRef = useRef(null);
-  useEscapeKey(!!activeModal, closeActiveModal, modalRef);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted with values:", values);
-    handleAddItemSubmit(values);
+  const closeActiveModal = () => {
+    onClose();
   };
 
+  // Check if the current user is the owner of the selected card
+  const isOwn = card?.owner === currentUser?._id;
+
+  // Create a variable for the delete button class
+  const itemDeleteButtonClassName = `modal__delete ${isOwn ? "" : "modal__delete_hidden"}`;
+
+  useEscapeKey(!!activeModal, closeActiveModal, modalRef);
+
   return (
-    <ModalWithForm
-      isOpen={activeModal === "register"} 
-      title="Register" 
-      buttonText={buttonText}
-      activeModal={activeModal}
-      handleCloseClick={closeActiveModal}
-      onSubmit={handleSubmit}
-      modalRef={modalRef}
+    <div
+      className={`modal ${activeModal === "preview" && "modal_opened"}`}
+      ref={modalRef}
     >
-      <label htmlFor="email" className="modal__label">
-        Email
-        <input
-          type="email" 
-          className="modal__input"
-          id="email"
-          name="email"
-          placeholder="Email"
-          value={values.email}
-          onChange={handleChange}
-        />
-      </label>
+      <div className="modal__content modal__content_type_image">
+        <button onClick={onClose} type="button" className="modal__close">
+          <img src={itemModalclose} alt="close_button" />
+        </button>
+        <img src={card.imageUrl} alt={card.name} className="modal__image" />
 
-      <label htmlFor="password" className="modal__label">
-        Password
-        <input
-          type="password" 
-          className="modal__input"
-          id="password"
-          name="password"
-          placeholder="Password"
-          value={values.password}
-          onChange={handleChange}
-        />
-      </label>
+        <div className="modal__footer">
+          <section className="modal__footer-section">
+            <h2 className="modal__caption">{card.name}</h2>
+            <p className="modal__weather">Weather: {card.weather}</p>
+          </section>
+          <section>
+            {/* Option 1: Use conditional class name */}
+            <button
+              onClick={() => handleDeleteClick(card)}
+              type="button"
+              className={itemDeleteButtonClassName}
+            >
+              Delete item
+            </button>
 
-      <label htmlFor="name" className="modal__label">
-        Name
-        <input
-          type="text"
-          className="modal__input"
-          id="name"
-          name="name"
-          placeholder="Name"
-          value={values.name}
-          onChange={handleChange}
-        />
-      </label>
-
-      <label htmlFor="avatarURL" className="modal__label">
-        Avatar URL
-        <input
-          type="text"
-          className="modal__input"
-          id="avatarURL" 
-          name="avatarURL"
-          placeholder="Avatar URL"
-          value={values.avatarURL}
-          onChange={handleChange}
-        />
-      </label>
-    </ModalWithForm>
+            {/* Option 2: Use conditional rendering */}
+            {/* 
+            {isOwn && (
+              <button
+                onClick={() => handleDeleteClick(card)}
+                type="button"
+                className="modal__delete"
+              >
+                Delete item
+              </button>
+            )} 
+            */}
+          </section>
+        </div>
+      </div>
+    </div>
   );
-};
+}
 
-export default RegisterModal;
-
-//LoginModal
-
-// import React, { useRef, useState } from "react";
-// import ModalWithForm from "../ModalWithForm/ModalWithForm";
-// import { useForm } from "../../utils/useForm";
-// import useEscapeKey from "../../utils/useEscapeKey";
-
-// const LoginModal = ({
-//   activeModal,
-//   closeActiveModal,
-//   handleAddItemSubmit,
-//   buttonText,
-// }) => {
-//   const { values, handleChange } = useForm({
-//     email: "",
-//     password: "",
-    
-//   });
-
-//   const modalRef = useRef(null);
-//   useEscapeKey(!!activeModal, closeActiveModal, modalRef);
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     console.log("Form submitted with values:", values);
-//     handleAddItemSubmit(values);
-//   };
-
-//   return (
-//     <ModalWithForm
-//       isOpen={activeModal === "login"} 
-//       title="Login" 
-//       buttonText={buttonText}
-//       activeModal={activeModal}
-//       handleCloseClick={closeActiveModal}
-//       onSubmit={handleSubmit}
-//       modalRef={modalRef}
-//     >
-//       <label htmlFor="email" className="modal__label">
-//         Email
-//         <input
-//           type="email" 
-//           className="modal__input"
-//           id="email"
-//           name="email"
-//           placeholder="Email"
-//           value={values.email}
-//           onChange={handleChange}
-//         />
-//       </label>
-
-//       <label htmlFor="password" className="modal__label">
-//         Password
-//         <input
-//           type="password" 
-//           className="modal__input"
-//           id="password"
-//           name="password"
-//           placeholder="Password"
-//           value={values.password}
-//           onChange={handleChange}
-//         />
-//       </label>
-
-      
-//     </ModalWithForm>
-//   );
-// };
-
-// export default LoginModal;
-
-
-
-
+export default ItemModal;
