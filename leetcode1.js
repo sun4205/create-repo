@@ -25,18 +25,6 @@ const removeDuplicates = function (nums){
     return k;
 }
 
-var removeElement = function(nums, val) {
-    let k=0;
-    for(let i=0; i<nums.length; i++){
-        for(let j=0; j<val.length; j++){
-            if(nums[i] === val[i]){
-                nums = nums.filter(num => num == val[i]);
-                k++;
-            }
-        }
-    }
-    return k;
-};
 
 var removeElement = function(nums, val) {
     let k = 0;  
@@ -50,3 +38,17 @@ var removeElement = function(nums, val) {
     
     return k;  
 };
+
+const searchInsert = function(nums, target) {
+    let left = 0, right = nums.length - 1;
+
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+
+        if (nums[mid] === target) return mid;  
+        else if (nums[mid] < target) left = mid + 1;  
+        else right = mid - 1; 
+    }
+
+    return left;  
+}; 
