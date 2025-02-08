@@ -14,6 +14,7 @@ const twoSum = function (nums, target) {
 
 
 
+
 const removeDuplicates = function (nums){
     let k=1;
     for(let i=0; i<nums.length-1; i++){
@@ -24,7 +25,6 @@ const removeDuplicates = function (nums){
     }
     return k;
 }
-
 
 var removeElement = function(nums, val) {
     let k = 0;  
@@ -38,6 +38,8 @@ var removeElement = function(nums, val) {
     
     return k;  
 };
+
+
 
 const searchInsert = function(nums, target) {
     let left = 0, right = nums.length - 1;
