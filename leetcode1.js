@@ -79,3 +79,24 @@ var merge = function (nums1, m, nums2, n) {
     k--;
   }
 };
+
+function sortedArrayToBST(nums) {
+ 
+    function buildTree(left, right) {
+     
+      if (left > right) return null;
+  
+      
+      const mid = Math.floor((left + right) / 2);
+      
+      const node = { val: nums[mid], left: null, right: null };
+  
+     
+      node.left = buildTree(left, mid - 1);  
+      node.right = buildTree(mid + 1, right);  
+  
+      return node;
+    }
+  
+    return buildTree(0, nums.length - 1); 
+  }
