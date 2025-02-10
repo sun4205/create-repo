@@ -63,7 +63,7 @@ const plusOne = function (digits) {
   return digits;
 };
 
-const merge = function (nums1, m, nums2, n) {
+var merge = function (nums1, m, nums2, n) {
   let i = m - 1;
   let j = n - 1;
   let k = m + n - 1;
