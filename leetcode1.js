@@ -51,31 +51,31 @@ const searchInsert = function (nums, target) {
   return left;
 };
 
-const plusOne = function(digits) {
-    for (let i = digits.length - 1; i >= 0; i--) {
-        if (digits[i] < 9) {
-            digits[i]++;  
-            return digits;
-        }
-        digits[i] = 0;  
+const plusOne = function (digits) {
+  for (let i = digits.length - 1; i >= 0; i--) {
+    if (digits[i] < 9) {
+      digits[i]++;
+      return digits;
     }
-    digits.unshift(1);  
-    return digits;
+    digits[i] = 0;
+  }
+  digits.unshift(1);
+  return digits;
 };
 
-const merge = function(nums1, m, nums2, n) {
-    let i = m - 1;      
-    let j = n - 1;     
-    let k = m + n - 1; 
+const merge = function (nums1, m, nums2, n) {
+  let i = m - 1;
+  let j = n - 1;
+  let k = m + n - 1;
 
-    while (j >= 0) { 
-        if (i >= 0 && nums1[i] > nums2[j]) {
-            nums1[k] = nums1[i]; 
-            i--;
-        } else {
-            nums1[k] = nums2[j]; 
-            j--;
-        }
-        k--;
+  while (j >= 0) {
+    if (i >= 0 && nums1[i] > nums2[j]) {
+      nums1[k] = nums1[i];
+      i--;
+    } else {
+      nums1[k] = nums2[j];
+      j--;
     }
+    k--;
+  }
 };
