@@ -1,7 +1,7 @@
 Input: (nums = [2, 7, 11, 15]), (target = 9);
 Output: [0, 1];
 
-const twoSum = function (nums, target) {
+var twoSum = function (nums, target) {
   const map = new Map();
 
   for (let i = 0; i < nums.length; i++) {
@@ -10,6 +10,19 @@ const twoSum = function (nums, target) {
     if (map.has(complement)) return [map.get(complement), i];
     map.set(nums[i], i);
   }
+};
+
+var twoSum = function(nums, target) {
+  let map = new Map();
+  
+  for(let i = 0; i < nums.length; i ++) {
+      if(map.has(target - nums[i])) {
+          return [map.get(target - nums[i]), i];
+      } else {
+          map.set(nums[i], i);
+      }
+  }
+return [];
 };
 
 const removeDuplicates = function (nums) {
