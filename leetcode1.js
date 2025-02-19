@@ -48,9 +48,9 @@ var removeDuplicates = function (nums) {
 };
 
 const removeDuplicates = function (nums) {
-  const uniqueNums = [...new Set(nums)]; // Set을 사용해 중복 제거
-  nums.length = 0; // 원본 배열 비우기
-  nums.push(...uniqueNums); // 고유한 값들을 다시 채우기
+  const uniqueNums = [...new Set(nums)]; 
+  nums.length = 0; 
+  nums.push(...uniqueNums); 
   return uniqueNums.length;
 };
 
