@@ -12,28 +12,17 @@ var twoSum = function (nums, target) {
   }
 };
 
-var twoSum = function(nums, target) {
+var twoSum = function (nums, target) {
   let map = new Map();
-  
-  for(let i = 0; i < nums.length; i ++) {
-      if(map.has(target - nums[i])) {
-          return [map.get(target - nums[i]), i];
-      } else {
-          map.set(nums[i], i);
-      }
-  }
-return [];
-};
 
-
-var twoSum = function(nums, target) {
-  for(let i=0; i<nums.length; i++) {
-      for(let j=i+1; j<nums.length; j++) {
-          if(nums[i]+nums[j] === target) {
-              return [i, j]
-          }
-      }
+  for (let i = 0; i < nums.length; i++) {
+    if (map.has(target - nums[i])) {
+      return [map.get(target - nums[i]), i];
+    } else {
+      map.set(nums[i], i);
+    }
   }
+  return [];
 };
 
 var removeDuplicates = function (nums) {
@@ -48,9 +37,9 @@ var removeDuplicates = function (nums) {
 };
 
 const removeDuplicates = function (nums) {
-  const uniqueNums = [...new Set(nums)]; 
-  nums.length = 0; 
-  nums.push(...uniqueNums); 
+  const uniqueNums = [...new Set(nums)];
+  nums.length = 0;
+  nums.push(...uniqueNums);
   return uniqueNums.length;
 };
 
@@ -112,43 +101,38 @@ var merge = function (nums1, m, nums2, n) {
 };
 
 function sortedArrayToBST(nums) {
- 
-    function buildTree(left, right) {
-     
-      if (left > right) return null;
-  
-      
-      const mid = Math.floor((left + right) / 2);
-      
-      const node = { val: nums[mid], left: null, right: null };
-  
-     
-      node.left = buildTree(left, mid - 1);  
-      node.right = buildTree(mid + 1, right);  
-  
-      return node;
-    }
-  
-    return buildTree(0, nums.length - 1); 
+  function buildTree(left, right) {
+    if (left > right) return null;
+
+    const mid = Math.floor((left + right) / 2);
+
+    const node = { val: nums[mid], left: null, right: null };
+
+    node.left = buildTree(left, mid - 1);
+    node.right = buildTree(mid + 1, right);
+
+    return node;
   }
 
-  function generate(numRows) {
-    let triangle = [[1]]; 
-  
-    for (let i = 1; i < numRows; i++) {
-      let prevRow = triangle[i - 1]; 
-      let newRow = [1]; 
-  
-      for (let j = 1; j < prevRow.length; j++) {
-        newRow.push(prevRow[j - 1] + prevRow[j]); 
-      }
-  
-      newRow.push(1); 
-      triangle.push(newRow); 
+  return buildTree(0, nums.length - 1);
+}
+
+function generate(numRows) {
+  let triangle = [[1]];
+
+  for (let i = 1; i < numRows; i++) {
+    let prevRow = triangle[i - 1];
+    let newRow = [1];
+
+    for (let j = 1; j < prevRow.length; j++) {
+      newRow.push(prevRow[j - 1] + prevRow[j]);
     }
-  
-    return triangle;
+
+    newRow.push(1);
+    triangle.push(newRow);
   }
-  
-  console.log(generate(5));
-  
+
+  return triangle;
+}
+
+console.log(generate(5));
