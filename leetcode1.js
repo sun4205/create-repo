@@ -36,7 +36,7 @@ var twoSum = function(nums, target) {
   }
 };
 
-const removeDuplicates = function (nums) {
+var removeDuplicates = function (nums) {
   let k = 1;
   for (let i = 0; i < nums.length - 1; i++) {
     if (nums[i] !== nums[i + 1]) {
@@ -45,6 +45,13 @@ const removeDuplicates = function (nums) {
     }
   }
   return k;
+};
+
+const removeDuplicates = function (nums) {
+  const uniqueNums = [...new Set(nums)]; // Set을 사용해 중복 제거
+  nums.length = 0; // 원본 배열 비우기
+  nums.push(...uniqueNums); // 고유한 값들을 다시 채우기
+  return uniqueNums.length;
 };
 
 var removeElement = function (nums, val) {
