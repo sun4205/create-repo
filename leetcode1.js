@@ -140,8 +140,7 @@ console.log(generate(5));
 function singleNumber(nums) {
   let result = 0;
   for (let num of nums) {
-    result ^= num; 
+    result ^= num;
   }
   return result;
 }
-
