@@ -136,3 +136,12 @@ function generate(numRows) {
 }
 
 console.log(generate(5));
+
+function singleNumber(nums) {
+  let result = 0;
+  for (let num of nums) {
+    result ^= num; 
+  }
+  return result;
+}
+
