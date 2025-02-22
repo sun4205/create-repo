@@ -1,4 +1,3 @@
-
 function getCardElement(data) {
   const cardElement = cardTemplate.content
     .querySelector(".card")
@@ -16,4 +15,3 @@ function getCardElement(data) {
     cardLikeBtn.classList.add("card__like-btn_liked");
   }
 }
-
