@@ -3,7 +3,6 @@ class Api {
     this._baseUrl = baseUrl;
     this._headers = headers;
   }
- 
 
   _checkResponse(res) {
     if (res.ok) {
@@ -11,8 +10,6 @@ class Api {
     }
     return Promise.reject(`Error: ${res.status}`);
   }
-
-  
 
   _request(endpoint, options = {}) {
     const finalOptions = {
@@ -22,6 +19,4 @@ class Api {
     const url = `${this._baseUrl}${endpoint}`;
     return fetch(url, finalOptions).then(this._checkResponse);
   }
- 
-
 }
