@@ -1,22 +1,13 @@
-class Api {
-  constructor({ baseUrl, headers }) {
-    this._baseUrl = baseUrl;
-    this._headers = headers;
-  }
-
-  _checkResponse(res) {
-    if (res.ok) {
-      return res.json();
-    }
-    return Promise.reject(`Error: ${res.status}`);
-  }
-
-  _request(endpoint, options = {}) {
-    const finalOptions = {
-      headers: this._headers,
-      ...options,
-    };
-    const url = `${this._baseUrl}${endpoint}`;
-    return fetch(url, finalOptions).then(this._checkResponse);
-  }
+function checkResponse(res) {
+  return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
 }
+
+function request(url, options) {
+  return fetch(url, options).then(checkResponse);
+}
+
+function getItems() {
+  return request(`${baseUrl}/items`);
+}
+
+
