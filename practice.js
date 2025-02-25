@@ -36,7 +36,3 @@ const removeItem = (_id) => {
     },
   });
 };
-
-
-
-
