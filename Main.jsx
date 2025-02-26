@@ -1,7 +1,7 @@
 import WeatherCard from "./WeatherCard";
 import ItemCard from "./ItemCard";
 
-function Main() {
+function Main({handleCardClick}) {
     return(
         <main>
             <WeatherCard />        
@@ -10,7 +10,7 @@ function Main() {
             <ul className="cards__listt">
                 {defaultClothingItmes.map((item)=>{
                     return(
-                       <ItemCard key={item._id} item={item} />
+                       <ItemCard key={item._id} item={item} handleCardClick={handleCardClick}/>
                     )
                 })}
             </ul>  

@@ -1,9 +1,12 @@
-function ItemCard({ item }) {
+function ItemCard({ item, handleCardClick }) {
+  const selectCardClick = () =>{
+    handleCardClick(item);
+  }
   return (
     <div>
       <li>
         <h2>{item.name}</h2>
-        <img src={item.link} alt="" />
+        <img onClick={selectCardClick} src={item.link} alt="" />
       </li>
     </div>
   );
