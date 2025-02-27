@@ -1,7 +1,4 @@
-const openRemoveItemModal = (card) => {
-    setSelectedCard(card);
-    setIsRemoveItemModalOpen(true);
-  };
+function checkResponse(res) {
+  return res.ok ? res.json() : Promise.reject(`Error: ${res.status}`);
+}
 
-  const closeRemoveItemModal = () => setIsRemoveItemModalOpen(false);
-  
