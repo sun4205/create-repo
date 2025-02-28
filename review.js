@@ -7,3 +7,9 @@ const handleAddItemSubmit = (item) => {
     })
   );
 };
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+  console.log("Form submitted with values:", values);
+  handleAddItemSubmit(values);
+};
