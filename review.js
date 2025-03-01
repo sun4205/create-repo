@@ -1,24 +1,16 @@
-import React, { useRef } from "react";
-import ModalWithForm from "../ModalWithForm/ModalWithForm";
-import { useForm } from "../../hooks/useForm";
+import { useState } from "react";
 
+export function useForm(initialValues) {
+  const [values, setValues] = useState(initialValues);
 
-const AddItemModal = ({
-  activeModal,
-  closeActiveModal,
-  handleAddItemSubmit,
-  buttonText,
-  modalRef,
-}) => {
-  const { values, handleChange } = useForm({
-    name: "",
-    imageUrl: "",
-    weather: "",
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted with values:", values);
-    handleAddItemSubmit(values);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues((preValues)=>({
+      ...preValues,
+      [name]:value,
+    }));
   };
+
+  return { values, handleChange, setValues };
 }
+
