@@ -12,3 +12,14 @@ export function useForm(inicialValues){
   }
   return {values, handleChange,setValues}
 }
+
+function asyncSubmit(request) {
+  setIsLoading(true);
+  request()
+    .then(closeActiveModal)
+
+    .catch(console.error)
+
+    .finally(() => setIsLoading(false));
+}
+
