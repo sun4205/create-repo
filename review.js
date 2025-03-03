@@ -93,3 +93,58 @@ const handleLogOut = () => {
   console.log("User logged out successfully.");
 };
 
+const updatedUserSubmit = ({
+  username,
+  avatar,
+  setCurrentUser,
+  closeActiveModal
+}) => {
+  updatdeUserData(username,avatar,setCurrentUser,closeActiveModal)
+  .then((updatedUser)=>{
+    setCurrentUser(updatedUser);
+    closeActiveModal();
+  })
+  .catch((error)=>console.error)
+}
+
+const handleCardLike = ({id,isLiked}) => {
+  const token = localStorage.getItem("jwt");
+  !isLiked
+  ?api
+  .addCardLike(id,token)
+  .then((updatedCard)=>{
+    setClothingItems((cards)=>cards.map((card)=>card._id===id?updatedCard:card))
+  })
+  .catch((err)=>console.log(err))
+  : api
+  .removeCardLike(id,token)
+  .then((updatedCard)=>{
+    setClothingItems((cards)=>cards.map((card)=>card._id===id?updatedCard:card))
+  })
+  .catch((err)=>console.log(err))
+}
+
+const handleRegisterSubmit = (values) => {
+  asyncSubmit(()=>{
+    auth.register(values.name,values.avatar,values.email,values.password)
+    .then(()=>{
+      handleLogin({username:values.email,password:values.password});
+    })
+  })
+}
+
+const handleDeleteConfirm = () => {
+  if(selectedCard){
+    asyncSubmit(()=>{
+      removeItem(selectedCard._id)
+      .then(()=>{
+        setClothingItems((prevItems)=>{
+          prevItems.filter((item)=>item._id !== selectedCard._id)
+        })
+        setDeleteConfirmation(false);
+        closeActiveModal();
+      })
+      .catch((err)=>console.log(err));
+    })
+  }
+}
