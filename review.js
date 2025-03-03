@@ -1,35 +1,19 @@
-import {useNavigate, useLocation} from'react-router-dom'
+const handleAddClick = () =>{
+  setActiveModal("add-garment");
+}
 
-const navigate = useNavigate();
-const location = useLocation();
+const changeCurrentUserData =(username, avatar) =>{
+  setActiveModal("edit-profile");
+}
 
+const openRegisterModal = () => {
+  setActiveModal("register");
+}
 
-const openRemoveItemModal = (card) => {
-  setSelectedCard(card);
-  setIsRemoveItemModalOpen(true);
-};
-const closeRemoveItemModal = () => setIsRemoveItemModalOpen(false);
+const openLoginModal = () => {
+  setActiveModal("login");
+}
 
-
-const handleCardClick = (card) => {
-  console.log("Clicked card:", card);
-  setActiveModal("preview");
-  setSelectedCard(card);
-};
-
-const handleDeleteClick = (card) => {
-  console.log("handleDeleteClick called with card:", card);
-  setSelectedCard(card);
-  openRemoveItemModal(card);
-};
-
-
-
-
-
-
-
-
-
-
-
+const closeActiveModal = () => {
+  setActiveModal("");
+}
