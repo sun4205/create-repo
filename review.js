@@ -17,3 +17,7 @@ const openLoginModal = () => {
 const closeActiveModal = () => {
   setActiveModal("");
 }
+
+const handleToggleSwitchChange = () => {
+  setCurrentTemperatureUnit((prevUnit)=>(prevUnit==="F"?"C":"F"));
+}
