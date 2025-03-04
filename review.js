@@ -148,3 +148,15 @@ const handleDeleteConfirm = () => {
     })
   }
 }
+
+
+useEffect(()=>{
+  getWeather(coordinates, APIkey)
+  .then((data)=>{
+    console.log(data);
+    const filterData = filterWeatherData(data,urrentTemperatureUnit);
+    setWeatherdata(filterData);
+  })
+  .catch(console.error);
+
+},[])
