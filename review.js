@@ -28,4 +28,30 @@ export const baseUrl = process.env.NODE_ENV === "production"
   ? "https://api.Fit24.jumpingcrab.com"
   : "http://localhost:3001";
 
-  
+function checkResponse(res){
+  return res.ok? res.json() :Promise.reject(`Error:${res.status}`);
+}
+
+function request(url,options){
+  return fetch(url,options).then(checkResponse);
+}
+
+function getItem(){
+  return request(`${baseUrl}/item`);
+}
+
+const addItem = ({ name, weather, imageUrl }) => {
+  return request(`${baseUrl}/items`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${localStorage.getItem("jwt")}`,
+    },
+    body: JSON.stringify({
+      name,
+      weather,
+      imageUrl,
+    }),
+  });
+};
+
