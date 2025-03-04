@@ -40,14 +40,14 @@ function getItem(){
   return request(`${baseUrl}/item`);
 }
 
-const addItem = ({ name, weather, imageUrl }) => {
-  return request(`${baseUrl}/items`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: `Bearer ${localStorage.getItem("jwt")}`,
+const addItem = ({name,weather,imageUrl})=>{
+  return request(`${baseUrl}/item`,{
+    method:"POST",
+    headers:{
+      "Content-type":"application/json",
+      authorization:`Bearer ${token}`,
     },
-    body: JSON.stringify({
+    body:JSON.stringify({
       name,
       weather,
       imageUrl,
@@ -55,3 +55,48 @@ const addItem = ({ name, weather, imageUrl }) => {
   });
 };
 
+const updatedUserData = (username,avatar)=>{
+  const token = localStorage.getItem("jwt");
+  if(!token) return;
+  if(!username || !avatar) return;
+  return fetch(`${baseUrl}/users/me`,{
+    method:"PATCH",
+    headers:{
+      "Content-type":"application/json",
+      authorization:`Bearer${token}`,
+    },
+    body:JSON.stringify({name:username, avatar:avatar||""}),
+  })
+  .then((res)=>{
+    if(!res.ok){
+      throw new Error(`failed to updated user data`)
+    }
+    return res.json();
+  }
+  )
+  .catch((error)=>console.error(error.messge))
+}
+
+const addCardLike = (id,token)=>{
+  return fetch(`${baseUrl}/items/${id}/likes`,{
+    method:"PUT",
+    headers:{
+      "Content-Type":"application/json",
+      authorization:`Bearer ${token}`,
+    }    
+  })
+  .then((res)=>res.json())
+    .catch((err)=>console.log(err))
+};
+
+const removeCardLike = (id, token) => {
+  return fetch(`${baseUrl}/items/${id}/likes`,{
+    method:"DELETE",
+    haeders:{
+      "Content-Type":"application/json",
+      authorization:`Bearer ${token}`,
+    }
+  })
+  .then((res)=>res.json())
+  .catch((err)=>console.log(err))
+};
