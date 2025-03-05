@@ -1,17 +1,15 @@
-const CurrentUserContext = React.createContext({
-  currentUser: null,
-  setCurrentUser: () => {},
-});
-
-export default CurrentUserContext;
-
-const handleToggleSwitchChange = () =>{
-  setCurrentTemperatureUnit((prevUnit)=>(prevUnit==="F"?"c":"F"))
-}
-
-const {currentUser} = useContext(CurrentUserContext);
-const username = currentUser?.name || "Anonymous";
-const currentDate = new Date().toLocaleDateString("default",{
-  month:"long",
-  day:"number",
-});
+return (
+  <header className = "header">
+   
+    <Link to = "/">
+    <img src={logo} className="header__logo" alt={logo}/>
+    </Link>
+    <p className="header__date-and-location">{currentDate},{weatherData.city}</p>
+    <div className="header_controls">
+      <toggleSwitch />
+      <button className="header__add-btn" onClick={handleChange}>add button</button>
+      <button className="header__user-name" onClick={}></button>
+    </div>
+   
+  </header>
+)
