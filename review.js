@@ -1,12 +1,8 @@
-<label htmlFor="password" className="modal__label">
-        Password
-        <input
-          type="password"
-          className="modal__input"
-          id="password"
-          name="password"
-          placeholder="Enter Password"
-          value={values.password}
-          onChange={handleChange}
-        />
-      </label>
+import React from "react";
+
+const CurrentUserContext = React.createContext({
+  currentUser: null,
+  setCurrentUser: () => {},
+});
+
+export default CurrentUserContext;
