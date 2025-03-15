@@ -1,44 +1,25 @@
-import React, { useState } from "react";
-import "./Navigation.css";
-import Union from "../../images/Union.svg";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
-import { useContext } from "react";
+import "./NewsCard.css";
+import savebtn from "../../images/savebtn.svg";
+import nature from"../../images/nature.svg";
 
 
-function Navigation({ openLoginModal }) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-
+function NewsCard(data) {
+  
   return (
-    <div className="navigation__nav">
-      <button type="button" className="navigation__home-btn">
-        Home
-      </button>
-      {!currentUser ? (
-        <button
-          type="button"
-          onClick={openLoginModal}
-          className="navigation__signIn-btn"
-        >
-          Sign In
-        </button>
-      ) : (
-        <div className="navigation__loggedIn-control">
-          <a href="/savedArticle">
-            <button type="button" className="navigation__savedArticle-nav">
-              Saved Articles
-            </button>
-          </a>
-
-          <div className="navigation__username">
-            {currentUser.username}
-            <button type="button">
-              <img src={Union} className="navigation__logout" />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+   
+    <li className="card">
+      <div className="card__image-control">
+      <img className="card__image" src={nature} alt="nature" />
+      <button className="card__save-btn"><img src={savebtn}className="card__savebtn-img"></img></button>
+      </div>
+      <div className="card__info">
+      <p className="card__date">November 4, 2020</p>
+      <p className="card__title">Everyone Needs a Special 'Sit Spot' in Nature</p>
+      <p className="card__description">Ever since I read Richard Louv's influential book, "Last Child in the Woods," the idea of having a special "sit spot" has stuck with me. This advice, which Louv attributes to nature educator Jon Young, is for both adults and children to find...</p>
+      <p className="card__source">treehugger</p>
+      </div>
+    </li>
   );
 }
 
-export default Navigation;
+export default NewsCard;
