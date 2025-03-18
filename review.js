@@ -1,17 +1,12 @@
-const express = require('express');
-const { errors } = require("celebrate");
-const mainRouter = require('./routes/index');
-const errorHandler = require('./middlewares/error-handler');
+import './savedArticles.css';
 
-const app = express();
-
-const {PORT = 3000} = process.env;
-
-app.use(express.json());
-app.use("/", mainRouter);
-app.use(errors());
-app.use(errorHandler);
-
-app.listen(PORT, ()=>{
-    console.log(`listening on port ${PORT}`);
-})
+function SavedArticles() {
+    return(
+        <div className='savedArticles__container'>
+            <p className='savedArticles__title'>Saved articles</p>
+            <p className='savedArticles__numberSaved'>you have 5 saved articles</p>
+            <p className='savedArticles__by'>By keywords: <span className='savedArticles__kewords'>Nature, Yellowstone, and 2 other</span></p>
+        </div>
+    )
+}
+export default SavedArticles;
