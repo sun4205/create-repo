@@ -1,31 +1,31 @@
-import "./Main.css";
+import "./savedArticles.css";
 import NewsCard from "../NewsCard/NewsCard";
-import About from "../About/About";
-import ShowMore from "../ShowMore/ShowMore";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
 
+function SavedArticles({ savedArticles }) {
+  console.log("savedArticles:", savedArticles);
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+    return(
+         <div className='savedArticles__container'>
+             <p className='savedArticles__title'>Saved articles</p>
+             <p className='savedArticles__numberSaved'>{currentUser.username}, you have {savedArticles.length} saved articles</p>
+            <p className='savedArticles__by'>By keywords: <span className='savedArticles__keywords'> {savedArticles.map(article => article.keywords).join(", ")}</span></p>
 
-function Main({newsData,newsItems}) {
-  console.log("newsItems in Main:", newsItems);
-  return (
-    <main className="main">
-      <h2 className="main__title">Search results</h2>
-      <section className="main__cards">
-        <ul className="main__cards-list">
-        {Array.isArray(newsItems.articles) && newsItems.articles.length > 0 ? (
-            newsItems.articles.slice(0, 9).map((item, index) => (
-              <NewsCard key={index} data={item} />
-            ))
-          ) : (
-            <p>No news items available</p>
-          )}
-                 
-        </ul>
-        <ShowMore />
-        <About />
-       
-      </section>
-    </main>
-  );
-}
+             <ul className='savedArticles__lists'>
+            {savedArticles.map((article, index) => (
+           <NewsCard
+             key={index}
+            image={article.urlToImage}
+             date={article.date}
+             title={article.title}
+             description={article.description}
+             source={article.source.name}
+           saveBtnImage={article.saveBtnImage}
+          />
+         ))}
+             </ul>
+         </div>
+    )
+  }
 
-export default Main;
+export default SavedArticles;
