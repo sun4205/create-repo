@@ -1,72 +1,71 @@
-import React, { useState } from "react";
-import "./Navigation.css";
-import { useNavigate, useLocation } from "react-router-dom";
-import logout from "../../images/logout.svg";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
-import { useContext } from "react";
+const handleNewsSaved = ({ data }) => {
+   
+  const token = localStorage.getItem("jwt");
+  const articleId = crypto.randomUUID();
+  const saved = data.saved;
+  const { source, title, date, description, image } = data;
 
-function Navigation({ openLoginModal, handleLogOut }) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const currentArticle = Array.isArray(newsItems.articles)
+    ? newsItems.articles
+    : [];
+    console.log("currentarticle", currentArticle);
+ 
+  const currentSavedArticles =
+    JSON.parse(localStorage.getItem("savedArticles")) || [];
+   
+    const isArticleAlreadySaved = currentSavedArticles.some((item) => item.id === articleId);
 
-  const savedNewsPage = location.pathname === "/saveNews";
 
-  const handleHomeClick = () => {
-    console.log("Navigating to Home");
-    navigate("/");
-  };
+  if (!Array.isArray(currentArticle)) {
+    console.error(" newsItems is not an array!", newsItems);
+    return;
+  }
 
-  const handleSavedNews = () => {
-    console.log("Navigating to Saved News");
-    navigate("/saveNews");
-  };
+  if (isArticleAlreadySaved) {
+    console.log("This article is already saved.");
+    return; 
+  }
 
-  return (
-    <div className="navigation__nav">
-      <button
-        onClick={handleHomeClick}
-        type="button"
-        className={`navigation__home-btn ${savedNewsPage ? "font-black" : ""}`}
-      >
-        Home
-      </button>
-      {!currentUser ? (
-        <button
-          type="button"
-          onClick={openLoginModal}
-          className="navigation__signIn-btn"
-        >
-          Sign In
-        </button>
-      ) : (
-        <div className="navigation__loggedIn-control">
-          <button
-            onClick={handleSavedNews}
-            type="button"
-            className={`navigation__savedArticle-nav ${
-              savedNewsPage ? "font-black" : ""
-            }`}
-          >
-            Saved Articles
-          </button>
+  if (!saved) {
 
-          <div
-            className={`navigation__username ${
-              savedNewsPage ? "font-black" : ""
-            }`}
-          >
-            {currentUser.username}
-            <button
-              onClick={handleLogOut}
-              type="button"
-              className={`navigation__logout ${savedNewsPage ? 'logout-black' :'logout-white'}`}
-            ></button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
-export default Navigation;
+     api
+
+        .savedNews({ source, title, date, description, image })
+        .then((updatedData) => {
+          setNewsItems({
+            ...newsItems,
+            articles: [...currentArticle, updatedData],
+          });
+          setSavedArticles([...currentSavedArticles, updatedData]);
+          localStorage.setItem(
+            "savedArticles",
+            JSON.stringify([...currentSavedArticles, updatedData])
+          );
+          console.log("saving was successfull", updatedData);
+          console.log("currentsavedarticle",currentSavedArticles);
+        })
+        .catch((err) => console.log(err))
+       }else{ api
+
+        .removeNewsCardSved(articleId, token)
+        .then(() => {
+          const updatedSavedArticles = currentSavedArticles.filter(
+            (item) => item._id !== articleId
+          );
+          setNewsItems({
+            ...newsItems,
+            articles: currentArticle.filter(
+              (item) => item._id !== articleId
+            ),
+          });
+          setSavedArticles(updatedSavedArticles);
+          localStorage.setItem(
+            "savedArticles",
+            JSON.stringify(updatedSavedArticles)
+          );
+          console.log("delete complete");
+        })
+        .catch((err) => console.log(err));
+      }
+};
