@@ -1,64 +1,72 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
-const NotFoundError = require("../utils/errors/NotFoundError");
-const UnauthorizedError = require("../utils/errors/UnauthorizedError");
-const BadRequestError = require("../utils/errors/BadRequestError");
-const ConflictError = require("../utils/errors/ConflictError");
+import React, { useState } from "react";
+import "./Navigation.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import logout from "../../images/logout.svg";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
+import { useContext } from "react";
 
-const savedArticles = [];
+function Navigation({ openLoginModal, handleLogOut }) {
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-const getSavedArticles = (req, res, next) => {
-    const userId = req.user._id;
+  const savedNewsPage = location.pathname === "/saveNews";
 
-    if(!userId) {
-        return next(new UnauthorizedError("please login!"))
-    }
-    const userArticles = savedArticles.filter((article) => article.userId === userId);
-    return res.status(200).json(userArticles);
-};
+  const handleHomeClick = () => {
+    console.log("Navigating to Home");
+    navigate("/");
+  };
 
-const savedArticle = (req,res,next) => {
-    const userId = req.user._id;
-    const { source, title, date, description, image } = req.body;
-    const articleId = req.params.id;
-    if(!userId) {
-        return next(new UnauthorizedError("please login!"))
-    }
-    const newArticle = {
-        id: articleId, 
-        userId, 
-        source,
-        title,
-        date,
-        description,
-        image,
-      };
-    
-      savedArticles.push(newArticle);
-      return res.status(201).send(newArticle);
-    };
-    
-    
-    const deleteArticle = (req, res, next) => {
-      const articleId = req.params.id; 
-      const userId = req.user._id;
-    
-      if (!userId) {
-        return next(new UnauthorizedError("please login!"));
-      }
-    
-      const articleIndex = savedArticles.findIndex((article) => article.id === id && article.userId === userId);
-    
-      if (articleIndex === -1) {
-        return next(new NotFoundError("News article not found."));
-      }
-    
-      savedArticles.splice(articleIndex, 1); 
-      return res.status(200).json({ message: "news is deleted" });
-    };
-    
-    module.exports = { savedArticle, getSavedArticles, deleteArticle };
-    
+  const handleSavedNews = () => {
+    console.log("Navigating to Saved News");
+    navigate("/saveNews");
+  };
 
+  return (
+    <div className="navigation__nav">
+      <button
+        onClick={handleHomeClick}
+        type="button"
+        className={`navigation__home-btn ${savedNewsPage ? "font-black" : ""}`}
+      >
+        Home
+      </button>
+      {!currentUser ? (
+        <button
+          type="button"
+          onClick={openLoginModal}
+          className="navigation__signIn-btn"
+        >
+          Sign In
+        </button>
+      ) : (
+        <div className="navigation__loggedIn-control">
+          <button
+            onClick={handleSavedNews}
+            type="button"
+            className={`navigation__savedArticle-nav ${
+              savedNewsPage ? "font-black" : ""
+            }`}
+          >
+            Saved Articles
+          </button>
 
+          <div
+            className={`navigation__username ${
+              savedNewsPage ? "font-black" : ""
+            }`}
+          >
+            {currentUser.username}
+            <button
+              onClick={handleLogOut}
+              type="button"
+              className={`navigation__logout ${savedNewsPage ? 'logout-black' :'logout-white'}`}
+            ></button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Navigation;
