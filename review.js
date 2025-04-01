@@ -1,58 +1,79 @@
-import "./savedArticles.css";
-import NewsCard from "../NewsCard/NewsCard";
-import { useContext, useEffect } from "react";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const ConflictError = require("../utils/errors/ConflictError");
+
+const savedArticles = [];
+
+const getSavedArticles = (req, res, next) => {
+    const userId = req.user._id;
+
+    if(!userId) {
+        return next(new UnauthorizedError("please login!"))
+    }
+    const userArticles = savedArticles.filter((article) => article.userId === userId);
+    return res.status(200).json(userArticles);
+};
+
+const savedArticle = (req,res,next) => {
+  console.log("Received data:", req.body);
+    const userId = req.user._id;
+    const { id: articleId, source, title, date, description, image,keywords  } = req.body; 
+
+    console.log(req.body)
+    if(!userId) {
+        return next(new UnauthorizedError("please login!"))
+    }
+    if (!articleId) {
+      return next(new BadRequestError("Article ID is required"));
+    }
+    const newArticle = {
+        id: articleId, 
+        userId, 
+        source:source?.name, 
+        title,
+        date,
+        description,
+        image,
+        keywords,
+      };
+      console.log("newArticle:", newArticle);
+    
+      savedArticles.push(newArticle);
+      console.log("Saved Article:", savedArticles);
+      return res.status(201).send(newArticle);
+    };
+    
+    
+    const deleteArticle = (req, res, next) => {
+      const articleId = req.params.id; 
+      const userId = req.user._id;
+    
+      if (!userId) {
+        return next(new UnauthorizedError("please login!"));
+      }
+
+      console.log("Saved Articles:", savedArticles);
+      console.log("Article ID:", articleId);
+      console.log("User ID:", userId);
+    
+      const articleIndex = savedArticles.findIndex((article) => article.id === articleId  && article.userId === userId);
+    
+      if (articleIndex === -1) {
+        console.log("Article not found:", articleId);
+        return next(new NotFoundError("News article not found."));
+      }
+
+      console.log("Article found:", savedArticles[articleIndex]);
+    
+      savedArticles.splice(articleIndex, 1); 
+      return res.status(200).json({ message: "news is deleted" });
+    };
+    
+    module.exports = { savedArticle, getSavedArticles, deleteArticle };
+    
 
 
-function SavedArticles({
-  savedArticles,
-  handleRemoveArticle,
- setSavedArticles
-}) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
- 
-  console.log("savedArticles:", savedArticles);
-
-  
-  const allKeywords = [...new Set( (savedArticles || []) 
-  .filter(item => item && item.keywords) 
-  .flatMap(item => item.keywords)
-)];
-
-const keywordsText = allKeywords.length > 2  
-  ? `${allKeywords.slice(0, 2).join(", ")} and ${allKeywords.length - 2} others`  
-  : allKeywords.join(", ");  
-
-
-  
-  if (!currentUser) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div className="savedArticles__container">
-      <p className="savedArticles__title">Saved articles</p>
-      <p className="savedArticles__numberSaved">
-        {currentUser.username}, you have {savedArticles.length} saved articles
-      </p>
-      <p className="savedArticles__by">
-        By keywords:{" "}
-        <span className="savedArticles__keywords">
-        {keywordsText}
-        </span>
-      </p>
-
-      <ul className="savedArticles__lists">
-        {savedArticles.map((item, index) => (
-          <NewsCard
-            key={index}
-            data={item}
-            handleNewsSaved={() => handleNewsSaved({ data: item })}
-            handleRemoveArticle={handleRemoveArticle}
-          />
-        ))}
-      </ul>
-    </div>
-  );
-}
-export default SavedArticles;
