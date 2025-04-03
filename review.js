@@ -1,79 +1,83 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
-const NotFoundError = require("../utils/errors/NotFoundError");
-const UnauthorizedError = require("../utils/errors/UnauthorizedError");
-const BadRequestError = require("../utils/errors/BadRequestError");
-const ConflictError = require("../utils/errors/ConflictError");
 
-const savedArticles = [];
+const handleNewsSaved = (data) => {
+  const token = localStorage.getItem("jwt");
+  console.log("Received data in handleNewsSaved:", data);
+  console.log("data.id:", data.data.id);
 
-const getSavedArticles = (req, res, next) => {
-    const userId = req.user._id;
+  const dataId = data.data.id;
 
-    if(!userId) {
-        return next(new UnauthorizedError("please login!"))
-    }
-    const userArticles = savedArticles.filter((article) => article.userId === userId);
-    return res.status(200).json(userArticles);
+  const { id, source, title, date, description, image } = data.data;
+
+  const storedArticles =
+    JSON.parse(localStorage.getItem("savedArticles")) || [];
+  console.log("Stored articles:", storedArticles);
+
+  const isDuplicate = storedArticles.some((article) => {
+    console.log("Checking article:", article); 
+    console.log("article.id:", article.id);   
+    return article.id === dataId;
+  });
+  if (isDuplicate) {
+    console.log("Article is already saved, skipping...");
+    return;
+  }
+
+  const storedKeywords =
+    JSON.parse(localStorage.getItem("savedKeywords")) || [];
+
+  const updatedKeywords = storedKeywords.includes(query)
+    ? storedKeywords
+    : [...storedKeywords, query];
+  localStorage.setItem("savedKeywords", JSON.stringify(updatedKeywords));
+  setSavedArticles(updatedKeywords);
+  console.log("Calling savedNews function...");
+  api
+    .savedNews({
+      id,
+      source,
+      title,
+      date,
+      description,
+      image,
+      keywords: updatedKeywords,
+    })
+    .then((updatedData) => {
+      console.log("savedNews API response:", updatedData);
+      const newSavedArticles = [...storedArticles, updatedData];
+      console.log("newsSavedArticles", newSavedArticles);
+
+      localStorage.setItem("savedArticles", JSON.stringify(newSavedArticles));
+
+      return setSavedArticles(newSavedArticles);
+    })
+    .catch(console.error);
+};
+const handleRemoveArticle = (id) => {
+  console.log("Before deletion, savedArticles:", savedArticles);
+  console.log("Clicked article ID:", id); 
+  const token = localStorage.getItem("jwt");
+
+  if (!Array.isArray(savedArticles)) return;
+
+  api.removeNewsCardSaved(id, token)
+      .then(() => {
+          setSavedArticles((prevArticles) =>
+              prevArticles.filter((article) => article.id !== id)
+          );
+      })
+      .catch((err) => console.error("Failed to delete article:", err));
 };
 
-const savedArticle = (req,res,next) => {
-  console.log("Received data:", req.body);
-    const userId = req.user._id;
-    const { id, source, title, date, description, image,keywords  } = req.body; 
 
-    console.log(req.body)
-    if(!userId) {
-        return next(new UnauthorizedError("please login!"))
-    }
-    if (!id) {
-      return next(new BadRequestError("Article ID is required"));
-    }
-    const newArticle = {
-        id, 
-        userId, 
-        source:source?.name, 
-        title,
-        date,
-        description,
-        image,
-        keywords,
-      };
-      console.log("newArticle:", newArticle);
-    
-      savedArticles.push(newArticle);
-      console.log("Saved Article:", savedArticles);
-      return res.status(201).send(newArticle);
-    };
-    
-    
-    const deleteArticle = (req, res, next) => {
-      const articleId = req.params.id; 
-      const userId = req.user._id;
-    
-      if (!userId) {
-        return next(new UnauthorizedError("please login!"));
-      }
+const handleSearchSubmit = (values) => {
+  console.log("handleSearchSubmit called with:", values);
+  if (values.query.length < 3) return;
 
-      console.log("Saved Articles:", savedArticles);
-      console.log("Article ID:", articleId);
-      console.log("User ID:", userId);
-    
-      const articleIndex = savedArticles.findIndex((article) => article.id === articleId  && article.userId === userId);
-    
-      if (articleIndex === -1) {
-        console.log("Article not found:", articleId);
-        return next(new NotFoundError("News article not found."));
-      }
-
-      console.log("Article found:", savedArticles[articleIndex]);
-    
-      savedArticles.splice(articleIndex, 1); 
-      return res.status(200).json({ message: "news is deleted" });
-    };
-    
-    module.exports = { savedArticle, getSavedArticles, deleteArticle };
-    
-
-
+  localStorage.setItem("query", values.query);
+  asyncSubmit(() =>
+    newsapi.getNewsCards(values.query).then((data) => {
+      console.log("Fetched news data:", data);
+      setNewsItems(data);
+    })
+  );
+};
