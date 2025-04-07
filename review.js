@@ -1,120 +1,106 @@
-const bcrypt = require("bcryptjs");
-const fs = require("fs");
-const path = require("path");
-const jwt = require("jsonwebtoken");
-const { JWT_SECRET } = require("../utils/config");
-const NotFoundError = require("../utils/errors/NotFoundError");
-const UnauthorizedError = require("../utils/errors/UnauthorizedError");
-const BadRequestError = require("../utils/errors/BadRequestError");
-const ConflictError = require("../utils/errors/ConflictError");
+const baseUrl = "http://localhost:3000";
 
-const ARTICLES_FILE = path.join(__dirname, "..", "data", "savedArticles.json");
-console.log(ARTICLES_FILE);
-
-function readArticlesFromFile() {
-  if (!fs.existsSync(ARTICLES_FILE)) {
-    console.log("no file");
-    return [];
-  }
-  try {
-    const fileData = fs.readFileSync(ARTICLES_FILE, "utf-8");
-    return JSON.parse(fileData);
-  } catch (err) {
-    console.error("error:", err);
-    return [];
-  }
+function checkResponse(res) {
+  return res.ok ? res.json() : Promise.reject(`Error:${res.status}`);
 }
 
-function writeArticlesToFile(articles) {
-  fs.writeFileSync(ARTICLES_FILE, JSON.stringify(articles, null, 2));
+function request(url, options) {
+  return fetch(url, options).then(checkResponse);
 }
 
-const getSavedArticles = (req, res, next) => {
-  const userId = req.user._id;
+function getSavedNews({token}){
+  return request(`${baseUrl}/saveNews`,{
+    method:"GET",
+    headers:{
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
 
-  if (!userId) {
-    return next(new UnauthorizedError("please login!"));
-  }
-  const savedArticles = readArticlesFromFile();
-  const userArticles = savedArticles.filter(
-    (article) => article.userId === userId
-  );
 
-  return res.status(200).json(userArticles);
-};
+function getSaveKeywords({token}){
+  return request(`${baseUrl}/keywords`,{
+    method:"GET",
+    headers:{
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
 
-const savedArticle = (req, res, next) => {
-  console.log("Received data:", req.body);
-  const userId = req.user._id;
-  const { id, source, title, date, description, image, keywords, savedQuery } =
-    req.body;
+function SaveKeywords({token,keywords, id }){
+  console.log("Sending request to save keywords...");
+  const data = {
+    keywords,    
+    id,    
+  };
+  console.log("Data to send:", data);
+  return request(`${baseUrl}/keywords`,{
+    method:"POST",
+    headers:{
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+}
 
-  console.log(req.body);
-  console.log("savedQuery:", savedQuery);
-
-  if (!userId) {
-    return next(new UnauthorizedError("please login!"));
-  }
-  if (!id) {
-    return next(new BadRequestError("Article ID is required"));
-  }
-
-  const savedArticles = readArticlesFromFile();
-
-  const newArticle = {
+function savedNews({ id, source, title, date, description, image, keywords}) {
+  console.log("Sending fetch request...");
+  console.log("ID being sent:", id);
+  console.log("Data being sent:", {
     id,
-    userId,
-    source: source?.name,
+    source,
     title,
     date,
     description,
     image,
-    keywords,
-    savedQuery,
-  };
-  console.log("newArticle:", newArticle);
+    keywords
+  });
+ 
 
-  savedArticles.push(newArticle);
-  writeArticlesToFile(savedArticles);
+  const token = localStorage.getItem("jwt");
+  console.log("token:", token);
 
-  console.log("writeArticlesToFile called");
-  return res.status(200).json({ message: "Article saved successfully" });
+  return request(`${baseUrl}/saveNews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      id,
+      source,
+      title,
+      date,
+      description,
+      image,
+      keywords
+    }),
+  });
+    
 };
 
-const deleteArticle = (req, res, next) => {
-  const articleId = req.params.id;
-  const userId = req.user._id;
-
-  if (!userId) {
-    return next(new UnauthorizedError("please login!"));
+const removeNewsCardSaved = (id, token) => {
+  return request(`${baseUrl}/saveNews/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
   }
 
-  console.log("Saved Articles:", savedArticles);
-  console.log("Article ID:", articleId);
-  console.log("User ID:", userId);
-
-  const savedArticles = readArticlesFromFile();
-
-  const articleIndex = savedArticles.findIndex(
-    (article) => article.id === articleId && article.userId === userId
-  );
-
-  if (articleIndex === -1) {
-    console.log("Article not found:", articleId);
-    return next(new NotFoundError("News article not found."));
+  function checkEmailAvailable(email) {
+    return request(`${baseUrl}/users/check-email?email=${encodeURIComponent(email)}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
+  
 
-  console.log("Article found:", savedArticles[articleIndex]);
 
-  savedArticles.splice(articleIndex, 1);
-  writeArticlesToFile(savedArticles);
-  return res.status(200).json({ message: "news is deleted" });
-};
-
-module.exports = {
-  savedArticle,
-  getSavedArticles,
-  deleteArticle,
-  readArticlesFromFile,
-  writeArticlesToFile,
-};
+export { checkResponse, savedNews, removeNewsCardSaved, checkEmailAvailable, getSavedNews, getSaveKeywords,SaveKeywords};
