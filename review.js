@@ -1,106 +1,108 @@
-const baseUrl = "http://localhost:3000";
+import React, { useState } from "react";
+import "./Navigation.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
+import { useContext } from "react";
+import NewsExplorer from "../../images/NewsExplorer.svg";
+import close from "../../images/close.svg";
 
-function checkResponse(res) {
-  return res.ok ? res.json() : Promise.reject(`Error:${res.status}`);
-}
+function Navigation({ openLoginModal, handleLogOut, closeActiveModal }) {
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-function request(url, options) {
-  return fetch(url, options).then(checkResponse);
-}
+  const savedNewsPage = location.pathname === "/saveNews";
 
-function getSavedNews({token}){
-  return request(`${baseUrl}/saveNews`,{
-    method:"GET",
-    headers:{
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-
-function getSaveKeywords({token}){
-  return request(`${baseUrl}/keywords`,{
-    method:"GET",
-    headers:{
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-}
-
-function SaveKeywords({token,keywords, id }){
-  console.log("Sending request to save keywords...");
-  const data = {
-    keywords,    
-    id,    
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(prevState => !prevState); 
   };
-  console.log("Data to send:", data);
-  return request(`${baseUrl}/keywords`,{
-    method:"POST",
-    headers:{
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
+
+  const handleHomeClick = () => {
+    console.log("Navigating to Home");
+    navigate("/");
+    setIsMobileMenuOpen(false);
+  };
+
+  const closeMobileMenu = () => {
+    console.log("click")
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleSavedNews = () => {
+    console.log("Navigating to Saved News");
+    navigate("/saveNews");
+    setIsMobileMenuOpen(false);
+  };
+
+  return (
+    <div className="navigation">
+      <button
+        className={`navigation__mobile-menu ${
+          currentUser && savedNewsPage ? "black" : ""
+        }`}
+        onClick={toggleMobileMenu}
+      ></button>
+      <nav className={`navigation__nav navigation__nav__mobile ${isMobileMenuOpen ? "open" : ""}`} >
+        <div className="navigation__mobile-header">
+         <img src={NewsExplorer} className="navigation__logo" />
+         <button
+          onClick={() => {
+            closeMobileMenu();
+          }}
+          >
+          <img src={close} className="navigation__nav-btn" alt="close_button" />
+         </button>
+        </div>
+        <button
+          onClick={handleHomeClick}
+          type="button"
+          className={`navigation__home-btn ${
+            savedNewsPage ? "font-black" : ""
+          } ${isMobileMenuOpen ? "show-mobile" : ""}`}
+        >
+          Home
+        </button>
+        {!currentUser ? (
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="navigation__signIn-btn"
+          >
+            Sign In
+          </button>
+        ) : (
+          <div className="navigation__loggedIn-control">
+            <button
+              onClick={handleSavedNews}
+              type="button"
+              className={`navigation__savedArticle-nav ${
+                savedNewsPage ? "font-black" : ""
+              }`}
+            >
+              Saved Articles
+            </button>
+
+            <div
+              className={`navigation__username ${
+                savedNewsPage ? "font-black" : ""
+              }`}
+            >
+              {currentUser.username}
+              <button
+                onClick={handleLogOut}
+                type="button"
+                className={`navigation__logout ${
+                  savedNewsPage ? "logout-black" : "logout-white"
+                }`}
+              ></button>
+            </div>
+          </div>
+        )}
+      </nav>
+    </div>
+  );
 }
 
-function savedNews({ id, source, title, date, description, image, keywords}) {
-  console.log("Sending fetch request...");
-  console.log("ID being sent:", id);
-  console.log("Data being sent:", {
-    id,
-    source,
-    title,
-    date,
-    description,
-    image,
-    keywords
-  });
- 
-
-  const token = localStorage.getItem("jwt");
-  console.log("token:", token);
-
-  return request(`${baseUrl}/saveNews`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      id,
-      source,
-      title,
-      date,
-      description,
-      image,
-      keywords
-    }),
-  });
-    
-};
-
-const removeNewsCardSaved = (id, token) => {
-  return request(`${baseUrl}/saveNews/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  }
-
-  function checkEmailAvailable(email) {
-    return request(`${baseUrl}/users/check-email?email=${encodeURIComponent(email)}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
-  
-
-
-export { checkResponse, savedNews, removeNewsCardSaved, checkEmailAvailable, getSavedNews, getSaveKeywords,SaveKeywords};
+export default Navigation;
