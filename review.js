@@ -1,72 +1,93 @@
-import "./savedArticles.css";
-import NewsCard from "../NewsCard/NewsCard";
-import React, { useEffect, useState, useContext} from "react";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
+import { Link, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import "./Footer.css";
+import github from "../../images/Vector.svg";
 
+function Footer() {
+  const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 320);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 320);
+    };
 
+    window.addEventListener("resize", handleResize);
 
-function SavedArticles({
-  savedArticles,
-  handleRemoveArticle,
- setSavedArticles,
- fetchKeywords,
- keywords,
-}) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-  
- 
-  console.log("savedArticles:", savedArticles);
-  console.log("Keywords:", keywords);
+    handleResize();
 
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
-const allKeywords = savedArticles
-  .map((item) => item.keywords)      
-  .flat()                            
-  .filter(Boolean);                   
-
-
-const uniqueKeywords = [...new Set(allKeywords)];
-
-console.log("All Unique Keywords:", uniqueKeywords);
-
-
-const keywordsText =
-  uniqueKeywords.length > 2
-    ? `${uniqueKeywords.slice(0, 2).join(", ")} and ${uniqueKeywords.length - 2} others`
-    : uniqueKeywords.join(", ");
-
-console.log("keywordsText:", keywordsText);
-
-  
-  if (!currentUser) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div className="savedArticles__container">
-      <p className="savedArticles__title">Saved articles</p>
-      <p className="savedArticles__numberSaved">
-        {currentUser.username}, you have {savedArticles.length} saved articles
-      </p>
-      <p className="savedArticles__by">
-        By keywords:{" "}
-        <span className="savedArticles__keywords">
-        {keywordsText}
-        </span>
-      </p>
-
-      <ul className="savedArticles__lists">
-        {savedArticles.map((item, index) => (
-          <NewsCard
-            key={index}
-            data={item}
-            handleNewsSaved={() => handleNewsSaved({ data: item })}
-            handleRemoveArticle={handleRemoveArticle}
-          />
-        ))}
-      </ul>
-    </div>
+  return isMobile ? (
+    <footer className="footer footer__mobile">
+      <div className="footer__container">
+        <div className="footer__links-item-left">
+          <Link
+            to="/"
+            className="footer__link-item"
+            onClick={() => window.scrollTo(0, 0)}
+          >
+            Home
+          </Link>
+          <a
+            className="footer__link-item"
+            href="https://github.com/sun4205"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img className="footer__link-gitHub" src={github} alt="GitHub" />
+          </a>
+        </div>
+        <a
+          className="footer__link-item footer__link-item-tripleten"
+          href="https://tripleten.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          TripleTen
+        </a>
+        <p className="footer__paragraph footer__paragraph__mobile">
+          © 2025 Supersite, Powered by News API
+        </p>
+      </div>
+    </footer>
+  ) : (
+    <footer className="footer">
+      <div className="footer__container">
+        <p className="footer__paragraph">
+          © 2025 Supersite, Powered by News API
+        </p>
+        <div className="footer__links-item-container">
+          <Link
+            to="/"
+            className="footer__link-item"
+            onClick={() => window.scrollTo(0, 0)}
+          >
+            Home
+          </Link>
+          <a
+            className="footer__link-item"
+            href="https://tripleten.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            TripleTen
+          </a>
+          <a
+            className="footer__link-item"
+            href="https://github.com/sun4205"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img className="footer__link-gitHub" src={github} alt="GitHub" />
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 }
-export default SavedArticles;
+
+export default Footer;
