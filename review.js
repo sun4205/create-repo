@@ -1,108 +1,72 @@
-import React, { useState } from "react";
-import "./Navigation.css";
-import { useNavigate, useLocation } from "react-router-dom";
+import "./savedArticles.css";
+import NewsCard from "../NewsCard/NewsCard";
+import React, { useEffect, useState, useContext} from "react";
 import CurrentUserContext from "../../contexts/CurrentUserContext";
-import { useContext } from "react";
-import NewsExplorer from "../../images/NewsExplorer.svg";
-import close from "../../images/close.svg";
 
-function Navigation({ openLoginModal, handleLogOut, closeActiveModal }) {
+
+
+
+function SavedArticles({
+  savedArticles,
+  handleRemoveArticle,
+ setSavedArticles,
+ fetchKeywords,
+ keywords,
+}) {
   const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-  const navigate = useNavigate();
-  const location = useLocation();
+  
+ 
+  console.log("savedArticles:", savedArticles);
+  console.log("Keywords:", keywords);
 
-  const savedNewsPage = location.pathname === "/saveNews";
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const allKeywords = savedArticles
+  .map((item) => item.keywords)      
+  .flat()                            
+  .filter(Boolean);                   
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(prevState => !prevState); 
-  };
 
-  const handleHomeClick = () => {
-    console.log("Navigating to Home");
-    navigate("/");
-    setIsMobileMenuOpen(false);
-  };
+const uniqueKeywords = [...new Set(allKeywords)];
 
-  const closeMobileMenu = () => {
-    console.log("click")
-    setIsMobileMenuOpen(false);
-  };
+console.log("All Unique Keywords:", uniqueKeywords);
 
-  const handleSavedNews = () => {
-    console.log("Navigating to Saved News");
-    navigate("/saveNews");
-    setIsMobileMenuOpen(false);
-  };
+
+const keywordsText =
+  uniqueKeywords.length > 2
+    ? `${uniqueKeywords.slice(0, 2).join(", ")} and ${uniqueKeywords.length - 2} others`
+    : uniqueKeywords.join(", ");
+
+console.log("keywordsText:", keywordsText);
+
+  
+  if (!currentUser) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="navigation">
-      <button
-        className={`navigation__mobile-menu ${
-          currentUser && savedNewsPage ? "black" : ""
-        }`}
-        onClick={toggleMobileMenu}
-      ></button>
-      <nav className={`navigation__nav navigation__nav__mobile ${isMobileMenuOpen ? "open" : ""}`} >
-        <div className="navigation__mobile-header">
-         <img src={NewsExplorer} className="navigation__logo" />
-         <button
-          onClick={() => {
-            closeMobileMenu();
-          }}
-          >
-          <img src={close} className="navigation__nav-btn" alt="close_button" />
-         </button>
-        </div>
-        <button
-          onClick={handleHomeClick}
-          type="button"
-          className={`navigation__home-btn ${
-            savedNewsPage ? "font-black" : ""
-          } ${isMobileMenuOpen ? "show-mobile" : ""}`}
-        >
-          Home
-        </button>
-        {!currentUser ? (
-          <button
-            type="button"
-            onClick={openLoginModal}
-            className="navigation__signIn-btn"
-          >
-            Sign In
-          </button>
-        ) : (
-          <div className="navigation__loggedIn-control">
-            <button
-              onClick={handleSavedNews}
-              type="button"
-              className={`navigation__savedArticle-nav ${
-                savedNewsPage ? "font-black" : ""
-              }`}
-            >
-              Saved Articles
-            </button>
+    <div className="savedArticles__container">
+      <p className="savedArticles__title">Saved articles</p>
+      <p className="savedArticles__numberSaved">
+        {currentUser.username}, you have {savedArticles.length} saved articles
+      </p>
+      <p className="savedArticles__by">
+        By keywords:{" "}
+        <span className="savedArticles__keywords">
+        {keywordsText}
+        </span>
+      </p>
 
-            <div
-              className={`navigation__username ${
-                savedNewsPage ? "font-black" : ""
-              }`}
-            >
-              {currentUser.username}
-              <button
-                onClick={handleLogOut}
-                type="button"
-                className={`navigation__logout ${
-                  savedNewsPage ? "logout-black" : "logout-white"
-                }`}
-              ></button>
-            </div>
-          </div>
-        )}
-      </nav>
+      <ul className="savedArticles__lists">
+        {savedArticles.map((item, index) => (
+          <NewsCard
+            key={index}
+            data={item}
+            handleNewsSaved={() => handleNewsSaved({ data: item })}
+            handleRemoveArticle={handleRemoveArticle}
+          />
+        ))}
+      </ul>
     </div>
   );
 }
-
-export default Navigation;
+export default SavedArticles;
