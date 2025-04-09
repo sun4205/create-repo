@@ -1,93 +1,112 @@
-import { Link, useLocation } from "react-router-dom";
-import React, { useEffect, useState } from "react";
-import "./Footer.css";
-import github from "../../images/Vector.svg";
+import React, { useState } from "react";
+import "./Navigation.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
+import { useContext } from "react";
+import NewsExplorer from "../../images/NewsExplorer.svg";
+import close from "../../images/close.svg";
 
-function Footer() {
+function Navigation({ openLoginModal, handleLogOut, closeActiveModal }) {
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+  const navigate = useNavigate();
   const location = useLocation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 320);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 320);
-    };
+  const savedNewsPage = location.pathname.includes("/saveNews");
 
-    window.addEventListener("resize", handleResize);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    handleResize();
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen((prevState) => !prevState);
+  };
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const handleHomeClick = () => {
+    console.log("Navigating to Home");
+    navigate("/");
+    setIsMobileMenuOpen(false);
+  };
 
-  return isMobile ? (
-    <footer className="footer footer__mobile">
-      <div className="footer__container">
-        <div className="footer__links-item-left">
-          <Link
-            to="/"
-            className="footer__link-item"
-            onClick={() => window.scrollTo(0, 0)}
-          >
-            Home
-          </Link>
-          <a
-            className="footer__link-item"
-            href="https://github.com/sun4205"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img className="footer__link-gitHub" src={github} alt="GitHub" />
-          </a>
+  const closeMobileMenu = () => {
+    console.log("click");
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleSavedNews = () => {
+    console.log("Navigating to Saved News");
+    navigate("/saveNews");
+    setIsMobileMenuOpen(false);
+  };
+  return (
+    <div className="navigation">
+      <button
+        className={`navigation__mobile-menu ${
+          currentUser && savedNewsPage ? "black" : ""
+        }`}
+        onClick={toggleMobileMenu}
+      ></button>
+
+      <nav className={`navigation__nav  ${isMobileMenuOpen ? "open" : ""}`}>
+        <div className="navigation__mobile-header">
+          <img src={NewsExplorer} className="navigation__logo" alt="logo" />
+          <button onClick={closeMobileMenu}>
+            <img
+              src={close}
+              className="navigation__nav-btn"
+              alt="close_button"
+            />
+          </button>
         </div>
-        <a
-          className="footer__link-item footer__link-item-tripleten"
-          href="https://tripleten.com/"
-          target="_blank"
-          rel="noopener noreferrer"
+
+        <button
+          onClick={handleHomeClick}
+          type="button"
+          className={`navigation__home-btn ${
+            savedNewsPage ? "font-black" : ""
+          } ${isMobileMenuOpen ? "show-mobile" : ""}`}
         >
-          TripleTen
-        </a>
-        <p className="footer__paragraph footer__paragraph__mobile">
-          © 2025 Supersite, Powered by News API
-        </p>
-      </div>
-    </footer>
-  ) : (
-    <footer className="footer">
-      <div className="footer__container">
-        <p className="footer__paragraph">
-          © 2025 Supersite, Powered by News API
-        </p>
-        <div className="footer__links-item-container">
-          <Link
-            to="/"
-            className="footer__link-item"
-            onClick={() => window.scrollTo(0, 0)}
+          Home
+        </button>
+
+        {!currentUser && (
+          <button
+            type="button"
+            onClick={openLoginModal}
+            className="navigation__signIn-btn"
           >
-            Home
-          </Link>
-          <a
-            className="footer__link-item"
-            href="https://tripleten.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            TripleTen
-          </a>
-          <a
-            className="footer__link-item"
-            href="https://github.com/sun4205"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img className="footer__link-gitHub" src={github} alt="GitHub" />
-          </a>
-        </div>
-      </div>
-    </footer>
+            Sign In
+          </button>
+        )}
+
+        {currentUser && (
+          <div className="navigation__loggedIn-control">
+            <button
+              onClick={handleSavedNews}
+              type="button"
+              className={`navigation__savedArticle-nav ${
+                savedNewsPage ? "font-black" : ""
+              }`}
+            >
+              Saved Articles
+            </button>
+
+            <div
+              className={`navigation__username ${
+                savedNewsPage ? "font-black" : ""
+              }`}
+            >
+              {currentUser.username}
+              <button
+                onClick={handleLogOut}
+                type="button"
+                className={`navigation__logout ${
+                  savedNewsPage ? "logout-black" : "logout-white"
+                }`}
+              ></button>
+            </div>
+          </div>
+        )}
+      </nav>
+    </div>
   );
 }
 
-export default Footer;
+export default Navigation;
