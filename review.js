@@ -1,112 +1,50 @@
-import React, { useState } from "react";
-import "./Navigation.css";
-import { useNavigate, useLocation } from "react-router-dom";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
-import { useContext } from "react";
-import NewsExplorer from "../../images/NewsExplorer.svg";
-import close from "../../images/close.svg";
+import "./SearchForm.css";
+import { useEffect } from "react";
 
-function Navigation({ openLoginModal, handleLogOut, closeActiveModal }) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-  const navigate = useNavigate();
-  const location = useLocation();
+function SearchForm({ debouncedFetch, query, setQuery }) {
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
 
-  const savedNewsPage = location.pathname.includes("/saveNews");
-
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen((prevState) => !prevState);
+    if (value.trim().length >= 3) {
+      debouncedFetch(value);
+    }
   };
+  useEffect(() => {
+    return () => {
+      debouncedFetch.cancel();
+    };
+  }, [debouncedFetch]);
 
-  const handleHomeClick = () => {
-    console.log("Navigating to Home");
-    navigate("/");
-    setIsMobileMenuOpen(false);
-  };
-
-  const closeMobileMenu = () => {
-    console.log("click");
-    setIsMobileMenuOpen(false);
-  };
-
-  const handleSavedNews = () => {
-    console.log("Navigating to Saved News");
-    navigate("/saveNews");
-    setIsMobileMenuOpen(false);
-  };
   return (
-    <div className="navigation">
-      <button
-        className={`navigation__mobile-menu ${
-          currentUser && savedNewsPage ? "black" : ""
-        }`}
-        onClick={toggleMobileMenu}
-      ></button>
-
-      <nav className={`navigation__nav  ${isMobileMenuOpen ? "open" : ""}`}>
-        <div className="navigation__mobile-header">
-          <img src={NewsExplorer} className="navigation__logo" alt="logo" />
-          <button onClick={closeMobileMenu}>
-            <img
-              src={close}
-              className="navigation__nav-btn"
-              alt="close_button"
-            />
-          </button>
-        </div>
-
+    <div className="searchForm__container">
+      <h1 className="searchForm__title">What's going on in the world?</h1>
+      <p className="searchForm__description">
+        Find the latest news on any topic and save them in your personal
+        account.
+      </p>
+      <div className="searchForm__controls">
+        <label className="searchForm__label">
+          <input
+            className="searchForm__input"
+            type="search"
+            id="search__input"
+            name="search__input"
+            placeholder="Enter Topic"
+            value={query}
+            onChange={handleInputChange}
+          ></input>
+        </label>
         <button
-          onClick={handleHomeClick}
           type="button"
-          className={`navigation__home-btn ${
-            savedNewsPage ? "font-black" : ""
-          } ${isMobileMenuOpen ? "show-mobile" : ""}`}
+          onClick={() => handleSearchSubmit({ query })}
+          className="searchForm__btn"
         >
-          Home
+          Search
         </button>
-
-        {!currentUser && (
-          <button
-            type="button"
-            onClick={openLoginModal}
-            className="navigation__signIn-btn"
-          >
-            Sign In
-          </button>
-        )}
-
-        {currentUser && (
-          <div className="navigation__loggedIn-control">
-            <button
-              onClick={handleSavedNews}
-              type="button"
-              className={`navigation__savedArticle-nav ${
-                savedNewsPage ? "font-black" : ""
-              }`}
-            >
-              Saved Articles
-            </button>
-
-            <div
-              className={`navigation__username ${
-                savedNewsPage ? "font-black" : ""
-              }`}
-            >
-              {currentUser.username}
-              <button
-                onClick={handleLogOut}
-                type="button"
-                className={`navigation__logout ${
-                  savedNewsPage ? "logout-black" : "logout-white"
-                }`}
-              ></button>
-            </div>
-          </div>
-        )}
-      </nav>
+      </div>
     </div>
   );
 }
 
-export default Navigation;
+export default SearchForm;
