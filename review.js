@@ -1,90 +1,119 @@
-import "./NewsCard.css";
-import CurrentUserContext from "../../contexts/CurrentUserContext";
-import SavedArticlesContext from "../../contexts/SavedArticlesContext";
-import { useContext, useState } from "react";
-import { useLocation } from "react-router-dom";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
+const { JWT_SECRET } = require("../utils/config");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const ConflictError = require("../utils/errors/ConflictError");
 
-function NewsCard({ data, handleNewsSaved, handleRemoveArticle }) {
-  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
-  const { savedArticles, setSavedArticles } = useContext(SavedArticlesContext);
-  const [isSaved, setIsSaved] = useState(false);
-  const location = useLocation();
+const USERS_FILE = path.join(__dirname, "..", "data", "users.json");
 
-  const handleSaveClick = () => {
-    if (!data) {
-      console.error("data is null or undefined");
-      return;
-    }
-
-    if (!isSaved) {
-      setSavedArticles((prevSavedArticles) => {
-        const updatedArticles = [...prevSavedArticles, data];
-        console.log("savedupdatedarticles:", updatedArticles);
-        return updatedArticles;
-      });
-      handleNewsSaved(data);
-      setIsSaved(true);
-    } else {
-      setSavedArticles((prevSavedArticles) => {
-        const updatedArticles = prevSavedArticles.filter(
-          (article) => article && article.id !== data.id
-        );
-        console.log("updated:", updatedArticles);
-        return updatedArticles;
-      });
-
-      setIsSaved(false);
-    }
-  };
-
-  return (
-    <li className="card">
-      <div className="card__image-control">
-        <img className="card__image" src={data?.image} alt={data?.title} />
-
-        <div className="card__button-overlay">
-          {currentUser ? (
-            location.pathname === "/saveNews" ? (
-              <div className="card__delete-keyword-container">
-                <button
-                  onClick={() => handleRemoveArticle(data.id)}
-                  className="card__save-btn card__save-btn-delete"
-                ></button>
-                <span className="card__image__remove">Remove from saved</span>
-                <div className="card__image__keywords">
-                  <span className="card__image__keyword">{data?.keywords}</span>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={handleSaveClick}
-                className={`card__save-btn ${
-                  isSaved ? "card__save-btn--saved" : "card__save-btn--default"
-                }`}
-              ></button>
-            )
-          ) : (
-            <div className="card__sign-in-container">
-              <button className="card__save-btn card__save-btn--default"></button>
-              <button className="card__save-btn card__save-btn--signin">
-                <span className="card__sign-in-text">
-                  Sign in to save articles
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="card__info">
-        <p className="card__date">
-          {location.pathname === "/saveNews" ? data?.date : data?.date}
-        </p>
-        <p className="card__title">{data?.title}</p>
-        <p className="card__description">{data?.description}</p>
-        <p className="card__source">{data?.source?.name}</p>
-      </div>
-    </li>
-  );
+function readUsersFromFile() {
+  if (!fs.existsSync(USERS_FILE)) {
+    return [];
+  }
+  const fileData = fs.readFileSync(USERS_FILE, "utf-8");
+  return JSON.parse(fileData);
 }
 
-export default NewsCard;
+function writeUsersToFile(users) {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+}
+
+const getCurrentUser = (req, res, next) => {
+  const userId = req.user._id;
+
+  const users = readUsersFromFile();
+
+  users.forEach((user) => {
+    console.log("user._id:", user._id);
+  });
+
+  const user = users.find((user) => String(user._id) === String(userId));
+
+  if (!user) {
+    console.error("user not found!");
+    return next(new NotFoundError("User not found"));
+  }
+
+  res.send(user);
+};
+
+const createUser = (req, res, next) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return next(new BadRequestError("All fields are required."));
+  }
+
+  const users = readUsersFromFile();
+
+  const existingUser = users.find((user) => user.email === email);
+  if (existingUser) {
+    return next(new ConflictError("A user with this email already exists."));
+  }
+
+  bcrypt
+    .hash(password, 10)
+    .then((hashedPassword) => {
+      const newUser = {
+        _id: Date.now().toString(),
+        username,
+        email,
+        password: hashedPassword,
+      };
+
+      users.push(newUser);
+      writeUsersToFile(users);
+
+      return res.status(201).send({
+        _id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+      });
+    })
+    .catch((err) => {
+      return next(err);
+    });
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(new BadRequestError("Email and password are required."));
+  }
+  const users = readUsersFromFile();
+
+  const user = users.find((user) => user.email === email);
+  if (!user) {
+    return next(new UnauthorizedError("Invalid email or password."));
+  }
+
+  bcrypt
+    .compare(password, user.password)
+    .then((isMatch) => {
+      if (!isMatch) {
+        return next(new UnauthorizedError("Invalid email or password."));
+      }
+
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "30d",
+      });
+      return res.send({ token });
+    })
+    .catch((err) => {
+      return next(err);
+    });
+};
+
+const checkEmail = (req, res) => {
+  const { email } = req.query;
+  const users = readUsersFromFile();
+  const existingUser = users.find((user) => user.email === email);
+  res.json({ available: !existingUser });
+};
+
+module.exports = { getCurrentUser, createUser, login, checkEmail };
