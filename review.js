@@ -1,119 +1,109 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const fs = require("fs");
-const path = require("path");
-const { JWT_SECRET } = require("../utils/config");
-const NotFoundError = require("../utils/errors/NotFoundError");
-const UnauthorizedError = require("../utils/errors/UnauthorizedError");
-const BadRequestError = require("../utils/errors/BadRequestError");
-const ConflictError = require("../utils/errors/ConflictError");
 
-const USERS_FILE = path.join(__dirname, "..", "data", "users.json");
-
-function readUsersFromFile() {
-  if (!fs.existsSync(USERS_FILE)) {
-    return [];
-  }
-  const fileData = fs.readFileSync(USERS_FILE, "utf-8");
-  return JSON.parse(fileData);
-}
-
-function writeUsersToFile(users) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
-
-const getCurrentUser = (req, res, next) => {
-  const userId = req.user._id;
-
-  const users = readUsersFromFile();
-
-  users.forEach((user) => {
-    console.log("user._id:", user._id);
-  });
-
-  const user = users.find((user) => String(user._id) === String(userId));
-
-  if (!user) {
-    console.error("user not found!");
-    return next(new NotFoundError("User not found"));
-  }
-
-  res.send(user);
-};
-
-const createUser = (req, res, next) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    return next(new BadRequestError("All fields are required."));
-  }
-
-  const users = readUsersFromFile();
-
-  const existingUser = users.find((user) => user.email === email);
-  if (existingUser) {
-    return next(new ConflictError("A user with this email already exists."));
-  }
-
-  bcrypt
-    .hash(password, 10)
-    .then((hashedPassword) => {
-      const newUser = {
-        _id: Date.now().toString(),
-        username,
-        email,
-        password: hashedPassword,
-      };
-
-      users.push(newUser);
-      writeUsersToFile(users);
-
-      return res.status(201).send({
-        _id: newUser._id,
-        username: newUser.username,
-        email: newUser.email,
-      });
-    })
-    .catch((err) => {
-      return next(err);
-    });
-};
-
-const login = (req, res, next) => {
-  const { email, password } = req.body;
-
+const handleLogin = ({ email, password }) => {
   if (!email || !password) {
-    return next(new BadRequestError("Email and password are required."));
-  }
-  const users = readUsersFromFile();
-
-  const user = users.find((user) => user.email === email);
-  if (!user) {
-    return next(new UnauthorizedError("Invalid email or password."));
+    return;
   }
 
-  bcrypt
-    .compare(password, user.password)
-    .then((isMatch) => {
-      if (!isMatch) {
-        return next(new UnauthorizedError("Invalid email or password."));
+  auth
+    .authorize(email, password)
+    .then((data) => {
+      if (data.token) {
+        localStorage.setItem("jwt", data.token);
+        setJwt(data.token);
+        setIsLoggedIn(true);
+        console.log("Login successful!");
+
+        auth
+          .getUserInfo(data.token)
+          .then((userInfo) => {
+            setCurrentUser(userInfo);
+            console.log("User info updated:", userInfo);
+          })
+          .catch(console.error);
       }
-
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "30d",
-      });
-      return res.send({ token });
     })
-    .catch((err) => {
-      return next(err);
+    .catch(console.error);
+};
+
+const handleLogOut = () => {
+  token.removeToken();
+  setIsLoggedIn(false);
+  setCurrentUser(null);
+  setJwt(null);
+  navigate("/");
+  console.log("User logged out successfully.");
+};
+
+const handleNewsSaved = (data) => {
+  if (!jwt) {
+    console.log("No token found, user is not logged in.");
+    return;
+  }
+
+  const { id, source, title, date, description, image, keywords } = data.data;
+
+  api
+    .savedNews({
+      id,
+      source,
+      title,
+      date,
+      description,
+      image,
+      token: jwt,
+      keywords,
+    })
+    .then((response) => {
+      console.log("savedNews API response:", response);
+    })
+    .catch((error) => {
+      console.error("Error calling savedNews API:", error);
     });
 };
 
-const checkEmail = (req, res) => {
-  const { email } = req.query;
-  const users = readUsersFromFile();
-  const existingUser = users.find((user) => user.email === email);
-  res.json({ available: !existingUser });
+const handleRemoveArticle = (id) => {
+  const token = localStorage.getItem("jwt");
+
+  api
+    .removeNewsCardSaved(id, token)
+    .then(() => {
+      setSavedArticles((prevArticles) =>
+        prevArticles.filter((article) => article.id !== id)
+      );
+    })
+    .catch((err) => console.error("Failed to delete article:", err));
 };
 
-module.exports = { getCurrentUser, createUser, login, checkEmail };
+const debouncedFetch = useMemo(() => {
+  return debounce((searchTerm) => {
+    setIsLoading(true);
+    newsapi.getNewsCards(searchTerm).then((data) => {
+      setNewsItems(data);
+      setIsSearched(true);
+      setIsLoading(false);
+    });
+  }, 1000);
+}, []);
+
+const handleRegisterSubmit = ({ email, password, username }) => {
+  return auth.register(email, password, username);
+};
+
+useEffect(() => {
+  if (!jwt) {
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    return;
+  }
+
+  setIsLoading(true);
+
+  Promise.all([auth.getUserInfo(jwt), api.getSavedNews({ token: jwt })])
+    .then(([userInfo, savedArticles]) => {
+      setCurrentUser(userInfo);
+      setIsLoggedIn(true);
+      setSavedArticles(savedArticles);
+    })
+    .catch(console.error)
+    .finally(() => setIsLoading(false));
+}, [jwt]);
