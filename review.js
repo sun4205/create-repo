@@ -1,109 +1,89 @@
+import "./NewsCard.css";
+import CurrentUserContext from "../../contexts/CurrentUserContext";
+import SavedArticlesContext from "../../contexts/SavedArticlesContext";
+import { useContext, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-const handleLogin = ({ email, password }) => {
-  if (!email || !password) {
-    return;
-  }
+function NewsCard({ data, handleNewsSaved, handleRemoveArticle }) {
+  const { currentUser, setCurrentUser } = useContext(CurrentUserContext);
+  const { savedArticles, setSavedArticles } = useContext(SavedArticlesContext);
+  const [isSaved, setIsSaved] = useState(false);
+  const location = useLocation();
 
-  auth
-    .authorize(email, password)
-    .then((data) => {
-      if (data.token) {
-        localStorage.setItem("jwt", data.token);
-        setJwt(data.token);
-        setIsLoggedIn(true);
-        console.log("Login successful!");
+  const handleSaveClick = () => {
+    if (!data) {
+      console.error("data is null or undefined");
+      return;
+    }
 
-        auth
-          .getUserInfo(data.token)
-          .then((userInfo) => {
-            setCurrentUser(userInfo);
-            console.log("User info updated:", userInfo);
-          })
-          .catch(console.error);
-      }
-    })
-    .catch(console.error);
-};
+    if (!isSaved) {
+      setSavedArticles((prevSavedArticles) => {
+        const updatedArticles = [...prevSavedArticles, data];
+        console.log("savedupdatedarticles:", updatedArticles);
+        return updatedArticles;
+      });
+      handleNewsSaved(data);
+      setIsSaved(true);
+    } else {
+      setSavedArticles((prevSavedArticles) => {
+        const updatedArticles = prevSavedArticles.filter(
+          (article) => article && article.id !== data.id
+        );
+        console.log("updated:", updatedArticles);
+        return updatedArticles;
+      });
+      setIsSaved(false);
+    }
+  };
 
-const handleLogOut = () => {
-  token.removeToken();
-  setIsLoggedIn(false);
-  setCurrentUser(null);
-  setJwt(null);
-  navigate("/");
-  console.log("User logged out successfully.");
-};
+  return (
+    <li className="card">
+      <div className="card__image-control">
+        <img className="card__image" src={data?.image} alt={data?.title} />
 
-const handleNewsSaved = (data) => {
-  if (!jwt) {
-    console.log("No token found, user is not logged in.");
-    return;
-  }
+        <div className="card__button-overlay">
+          {currentUser ? (
+            location.pathname === "/saveNews" ? (
+              <div className="card__delete-keyword-container">
+                <button
+                  onClick={() => handleRemoveArticle(data.id)}
+                  className="card__save-btn card__save-btn-delete"
+                ></button>
+                <span className="card__image__remove">Remove from saved</span>
+                <div className="card__image__keywords">
+                  <span className="card__image__keyword">{data?.keywords}</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleSaveClick}
+                className={`card__save-btn ${
+                  isSaved ? "card__save-btn--saved" : "card__save-btn--default"
+                }`}
+              ></button>
+            )
+          ) : (
+            <div className="card__sign-in-container">
+              <button className="card__save-btn card__save-btn--default"></button>
+              <button className="card__save-btn card__save-btn--signin">
+                <span className="card__sign-in-text">
+                  Sign in to save articles
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="card__info">
+        <p className="card__date">
+          {location.pathname === "/saveNews" ? data?.date : data?.date}
+        </p>
+        <p className="card__title">{data?.title}</p>
+        <p className="card__description">{data?.description}</p>
+        <p className="card__source">{data?.source?.name}</p>
+      </div>
+    </li>
+  );
+}
 
-  const { id, source, title, date, description, image, keywords } = data.data;
-
-  api
-    .savedNews({
-      id,
-      source,
-      title,
-      date,
-      description,
-      image,
-      token: jwt,
-      keywords,
-    })
-    .then((response) => {
-      console.log("savedNews API response:", response);
-    })
-    .catch((error) => {
-      console.error("Error calling savedNews API:", error);
-    });
-};
-
-const handleRemoveArticle = (id) => {
-  const token = localStorage.getItem("jwt");
-
-  api
-    .removeNewsCardSaved(id, token)
-    .then(() => {
-      setSavedArticles((prevArticles) =>
-        prevArticles.filter((article) => article.id !== id)
-      );
-    })
-    .catch((err) => console.error("Failed to delete article:", err));
-};
-
-const debouncedFetch = useMemo(() => {
-  return debounce((searchTerm) => {
-    setIsLoading(true);
-    newsapi.getNewsCards(searchTerm).then((data) => {
-      setNewsItems(data);
-      setIsSearched(true);
-      setIsLoading(false);
-    });
-  }, 1000);
-}, []);
-
-const handleRegisterSubmit = ({ email, password, username }) => {
-  return auth.register(email, password, username);
-};
-
-useEffect(() => {
-  if (!jwt) {
-    setCurrentUser(null);
-    setIsLoggedIn(false);
-    return;
-  }
-
-  setIsLoading(true);
-
-  Promise.all([auth.getUserInfo(jwt), api.getSavedNews({ token: jwt })])
-    .then(([userInfo, savedArticles]) => {
-      setCurrentUser(userInfo);
-      setIsLoggedIn(true);
-      setSavedArticles(savedArticles);
-    })
-    .catch(console.error)
-    .finally(() => setIsLoading(false));
-}, [jwt]);
+export default NewsCard;
